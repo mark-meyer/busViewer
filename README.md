@@ -1,6 +1,12 @@
 # bus-routes
 
-> Client side app for displaying GTFS information
+> Bus Route app. This has both an express server and a Vue single page app (SPA) that runs in the browser. The express app serves the API that the Vue app consumes. The epxress app also serves the actual Vue SPA to the browser on /.
+
+> The Vue app requires a webpack build to deploy. This transpiles ES6, and loads with .vue files. Running `npm run build` will build the Vue app for production and put the packeged files in the /dist directory. The express server will look here and server these files as static file to the browser.
+
+> In development running `npm start` will start both the express server on port 3000 and the webpack dev server on port 8080. If you have previously built the Vue app, visiting http://localhost:3000/ will show the result of the build. Visiting http://localhost:8080 will show the currect live dev build using webpack's dev server. During development this has advantages: hot reloading and no required explicit build step. 
+
+> Both servers are running becuase even when using the Webpack dev server the Vue app needs to hit the API for GTFS information and this is serverd by express.
 
 ## Build Setup
 

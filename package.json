@@ -5,8 +5,8 @@
   "author": "Mark Meyer <mark@photo-mark.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config front_end_vue/build/webpack.dev.conf.js --host 0.0.0.0",
-    "start": "npm run dev | node ./express/bin/www",
+    "dev": "webpack-dev-server --inline --progress --config front_end_vue/build/webpack.dev.conf.js --host 0.0.0.0 | node ./express/bin/www",
+    "start": "npm run dev",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
