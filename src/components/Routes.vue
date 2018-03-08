@@ -1,7 +1,6 @@
 <template>
     <div id="routes"  v-bind:class="{menuOpen: menuOpen}">
-        <hamburger id="hamburger" :open='menuOpen' @toggled="toggleopen"></hamburger>
-
+        <div id="routeTab" @click='toggleopen'>{{tabText}}</div>
         <h3>Routes</h3>
         <ul>
             <li 
@@ -17,7 +16,6 @@
 </template>
 
 <script>
-import Hamburger from '@/components/Hamburger'
 
 export default {
     name: "Routes",
@@ -37,7 +35,11 @@ export default {
           this.menuOpen = !this.menuOpen
       }
     },
-    components: {hamburger: Hamburger}
+    computed: {
+        tabText(){
+           return this.menuOpen ? 'Cancel' :  'Routes'
+        }
+    }
 }
 </script>
 
@@ -52,21 +54,28 @@ export default {
         width: 18em;
         height: 100%;
         padding: 1em;
+        padding-right: 0;
         text-align: left;
         border-top: 5px solid #333;
         border-bottom: 5px solid #333;
     }
-    #hamburger {
+    #routeTab {
+        cursor: pointer;
         position: absolute;
-        right: -2.5em;
-        z-index: 200;
-        top: 20px;
-        visibility: hidden;
-        padding: .5em;
+        right: 0px;
+        transform-origin: bottom right;
+        transform: rotate(90deg);
+        border: 2px solid #ccc;
         background-color: #fff;
-        border-radius: 0 10px 10px 0;
+        z-index: 200;
+        top: 3em;
+        visibility: hidden;
+        padding: .25em 1em .75em 1em;
+        border-radius: 0 10px 0px 0;
     }
-    
+    #routeTab:hover{
+        border-color: #f1f118;
+    }
     h3 {
          margin-top:.5em
     }
@@ -107,7 +116,7 @@ export default {
     }
 
  @media only screen  and (max-width : 680px) {
-     #hamburger {
+     #routeTab {
          visibility: visible;
      }
      li{
@@ -127,9 +136,13 @@ export default {
     #routes.menuOpen {
         left: 0;
     }
-    .menuOpen #hamburger {
+    .menuOpen #routeTab {
         right: 0px;
-        border-radius: 10px 0px 0px 10px;
+        transform-origin: top right;
+        top: 6em;
+        border-top: none;
+        border-radius: 0px 0px 0px 10px;
+        padding: .75em 1em .5em 1em
     }
  }
   @media only screen  and (max-width : 680px) and (orientation : landscape){

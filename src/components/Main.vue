@@ -1,15 +1,15 @@
 <template>
     <div>
         <div id="header">
-            <div id="a">A</div> <h1> Anchorage Buses</h1> 
+            <div id="circle_a">A</div> <h1> Anchorage Buses</h1> 
             <businfo :bus='selectedBus' v-if="selectedBus" ></businfo>
 
         </div>
         <div id="root">
             <routes :selectedroute='selectedRoute' :routes='routes' v-on:pickRoute='highlightRoute' id="routes"></routes>
-                <div id="holder">
-                  <div ref="mainMap" id="mainMap"></div>
-                </div>
+            <div id="holder">
+                <div ref="mainMap" id="mainMap"></div>
+            </div>
         </div>
     </div>
 </template>
@@ -37,14 +37,11 @@ export default {
             } 
             this.selectedRoute = route
             this.selectedRoute.select()
-            this.$emit('pickedRoute')
         }
     },
     computed: {
         selectedBus: function(){
-            if (this.selectedRoute) {
-            return this.selectedRoute.selectedBus
-            }
+            return this.selectedRoute && this.selectedRoute.selectedBus
         }
     },
     components: {
@@ -52,8 +49,7 @@ export default {
         businfo: businfo
     },
     mounted: function(){
-        const mapDiv = this.$refs["mainMap"]
-        this.map = new google.maps.Map(mapDiv, {
+        this.map = new google.maps.Map(this.$refs["mainMap"], {
                 zoom: 12,
                 center: {lat: 61.18, lng: -149.860},
                 mapTypeControl: false,
@@ -73,8 +69,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
     #holder { 
-        position: relative;
-        width: 100%;
+        position: absolute;
+        left: 18em;
+        right: 0;
         height: 100%;
         border-top: 5px solid #333;
         border-bottom: 5px solid #333;
@@ -94,7 +91,7 @@ export default {
     h1 {
         font-size: 1.5em;
     }
-    #a {
+    #circle_a {
         font-size:2em;
         border: 12px solid #f1f118;
         border-radius: 50%;
@@ -117,14 +114,14 @@ export default {
         font-weight: normal;
     }
     a {
-    color: #42b983;
-}
+        color: #42b983;
+    }
  @media only screen  and (max-width : 680px) {
-     #header {
+        #header {
             align-items: baseline;
             margin-top: .5em;
         }
-        #a {
+        #circle_a {
             font-size: 1.25em;
             border: 8px solid #f1f118;
             line-height: 130%;
@@ -138,9 +135,9 @@ export default {
             bottom: 1em;
         }
         #holder{
+            left: 0;
             border-top: 2px solid;
             border-bottom: 2px solid
         }
-        
     }
 </style>

@@ -1,14 +1,12 @@
 import axios from 'axios'
 import {apiBaseUrl} from './config.js'
-/*
-    Classes Route and Bus
+/*  Classes Route and Bus
     These wrap google maps markers and ploylines
     to keep all the Maps Api code in one contained
     package.
 */
 class Route {
     static getRoutes(map){
-        console.log("get routes")
         return axios.get(`${apiBaseUrl}routes`)
         .then(routes => routes.data.map(route => new Route(route, map)))
     }
@@ -17,22 +15,26 @@ class Route {
         this.id        = data.route_id,
         this.name      = data.route_long_name,
         this.color     = "#" + data.route_color,
-        this.polylines = data.shapes.map(path => new google.maps.Polyline({ 
-            map: map,
-            path: path,
-            geodesic: true,
-            strokeColor: this.color,
-            strokeOpacity: 0.3,
-            strokeWeight: 3
+        this.polylines = data.shapes.map(path => 
+            new google.maps.Polyline({ 
+                map: map,
+                path: path,
+                geodesic: true,
+                strokeColor: this.color,
+                strokeOpacity: 0.3,
+                strokeWeight: 3
             })),
         this.stops = []
         this.buses = []
         this.selectedBus = undefined
     }
     select(){
+        // a single route can have more than one polyline
         this.polylines.map(line => line.setOptions({strokeOpacity: 1.0}))
         this.showStops()
+        .then(() => this.fitMapToRoute())
         this.getBuses()
+
     }
     deselect(){
         this.polylines.map(line => line.setOptions({strokeOpacity: 0.3}))
@@ -41,25 +43,29 @@ class Route {
         this.buses = []
     }
     showStops(){
+        // We only need to get the stops from the API the first time
         if (this.stops.length){
             this.stops.map(marker => marker.setMap(this.map))
+            return Promise.resolve()
         }
         else {
-            axios.get(`${apiBaseUrl}stops_on_route/${this.id}`)
+            return axios.get(`${apiBaseUrl}stops_on_route/${this.id}`)
             .then(r => {
-                this.stops = r.data.map(stop => new google.maps.Marker({
-                    position: {lat: +stop.stop_lat, lng: +stop.stop_lon},
-                    map: this.map,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 3,
-                        strokeColor: '#22aa66',
-                        strokeWeight: 2,
-                        fillColor:"#ffffff",
-                        fillOpacity: 1
-                    },
-                    title: stop.stop_name
-                }))
+                this.stops = r.data.map(stop => 
+                    new google.maps.Marker({
+                        position: {lat: +stop.stop_lat, lng: +stop.stop_lon},
+                        map: this.map,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 3,
+                            strokeColor: '#22aa66',
+                            strokeWeight: 2,
+                            fillColor:"#ffffff",
+                            fillOpacity: 1
+                        },
+                        title: stop.stop_name
+                    })
+                )
             })
         } 
     }
@@ -67,13 +73,12 @@ class Route {
         this.stops.map(marker => marker.setMap(null))
     }
     getBuses(){
-        axios.get(`${apiBaseUrl}buslocations/${this.id}`)
-        .then(r => {
-            this.buses = r.data.map(item => new Bus(item, this))
-        })
+        return axios.get(`${apiBaseUrl}buslocations/${this.id}`)
+        .then(r => this.buses = r.data.map(item => new Bus(item, this)))
     }
     selectBus(bus){
-        if (this.selectedBus == bus) {
+        if (this.selectedBus === bus) {
+            // toggle current bus if user clicks it again
             this.selectedBus = undefined
             bus.deselect()
         } else {
@@ -82,31 +87,34 @@ class Route {
             bus.select()
         }     
     }
+    fitMapToRoute(){
+        let bounds = new google.maps.LatLngBounds();
+        this.stops.forEach(stop => bounds.extend(stop.getPosition()) )
+        this.map.fitBounds(bounds)
+    }
 }
 
 class Bus{
     constructor(data, route, map){
-        this.route = route
-        this.map = route.map
-        this.selected = false
-        this.laststop = data.laststop[0]
-        this.direction = data.direction[0]
-        this.routeNumber = data.routeid[0]
-        this.destination = data.destination[0]
-        this.tripID = data.tripid[0]
-        this.opStatus = data['$']['op-status']
-        this.stops = []
+        this.route       = route
+        this.map         = route.map
+        this.selected    = false
+        this.laststop    = data.laststop
+        this.direction   = data.direction
+        this.routeNumber = data.routeid
+        this.destination = data.destination
+        this.tripID      = data.tripid
+        this.opStatus    = data['$']['op-status']
+        this.stops       = []
         this.marker = new google.maps.Marker({
-            position: {lat: +data.latitude[0], lng: +data.longitude[0]},
+            position: {lat: +data.latitude, lng: +data.longitude},
             map: this.route.map,
             zIndex: google.maps.Marker.MAX_ZINDEX + 1,
             icon: this.icon(),
             label: this.label(),
-            title: data.destination[0]
+            title: data.destination
         })
-        this.marker.addListener('click', () => {
-            this.route.selectBus(this)         
-        })
+        this.marker.addListener('click', () => this.route.selectBus(this))
         this.chaseInterval = undefined
         this.stopIcon = {
             path: google.maps.SymbolPath.CIRCLE,
@@ -163,7 +171,7 @@ class Bus{
     }
     showStops(){
         let url = `${apiBaseUrl}route_stops/${this.tripID}/${this.routeNumber}/${this.direction}`
-        axios.get(url)
+        return axios.get(url)
         .then(r => {
             this.stops = r.data.map(stop => {
                 return new google.maps.Marker({
@@ -191,7 +199,6 @@ class Bus{
     }
     stopChase(){
         clearInterval(this.chaseInterval)
-    }
-    
+    } 
 }
 export {Route}
