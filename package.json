@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js --host 0.0.0.0",
-    "start": "npm run dev",
+    "start": "npm run dev | node ./bin/www",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
@@ -15,7 +15,17 @@
   "dependencies": {
     "axios": "^0.18.0",
     "vue": "^2.5.2",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "body-parser": "~1.18.2",
+    "cookie-parser": "~1.4.3",
+    "csv-parse": "^2.0.4",
+    "debug": "~2.6.9",
+    "ejs": "~2.5.7",
+    "express": "~4.15.5",
+    "moment-timezone": "^0.5.14",
+    "morgan": "~1.9.0",
+    "serve-favicon": "~2.4.5",
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
