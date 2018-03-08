@@ -1,3 +1,5 @@
+const PORT = process.env.PORT || '3000';
+
 module.exports = {
-    apiBaseUrl: 'http://localhost:3000/api/'
+    apiBaseUrl: `http://localhost:${PORT}/api/`
 }
