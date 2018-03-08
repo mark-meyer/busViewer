@@ -1,7 +1,7 @@
 <template>
     <div>
         <div id="header">
-            <div id="circle_a">A</div> <h1> Anchorage Buses</h1> 
+            <div v-if="noSelection" id="circle_a" >A</div> <h1 v-if="noSelection"> Anchorage Buses</h1>
             <businfo :bus='selectedBus' v-if="selectedBus" ></businfo>
             <stopinfo id="stopInfo" v-if="selectedStop" :stop="selectedStop"></stopinfo>
         </div>
@@ -46,6 +46,9 @@ export default {
         },
         selectedStop: function(){
            return this.selectedRoute && this.selectedRoute.selectedStop 
+        },
+        noSelection: function(){
+            return !(this.selectedBus || this.selectedStop)
         }
     },
     components: {
