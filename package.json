@@ -5,12 +5,12 @@
   "author": "Mark Meyer <mark@photo-mark.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js --host 0.0.0.0",
+    "dev": "webpack-dev-server --inline --progress --config front_end_vue/build/webpack.dev.conf.js --host 0.0.0.0",
     "start": "npm run dev | node ./express/bin/www",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
-    "build": "node build/build.js"
+    "build": "node front_end_vue/build/build.js"
   },
   "dependencies": {
     "axios": "^0.18.0",
