@@ -79,12 +79,13 @@ export default {
         text-align: left;
         border-top: 5px solid #333;
         border-bottom: 5px solid #333;
-        
+         -ms-overflow-style: none;
     }
     #route_list {
         position: relative;
         height: 100%;
-        overflow-y: scroll
+        overflow-y: scroll;
+         -ms-overflow-style: none;
     }
     #routeTab {
         cursor: pointer;
