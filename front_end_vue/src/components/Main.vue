@@ -3,7 +3,7 @@
         <div id="header">
             <div id="circle_a">A</div> <h1> Anchorage Buses</h1> 
             <businfo :bus='selectedBus' v-if="selectedBus" ></businfo>
-
+            <stopinfo id="stopInfo" v-if="selectedStop" :stop="selectedStop"></stopinfo>
         </div>
         <div id="root">
             <routes :selectedroute='selectedRoute' :routes='routes' v-on:pickRoute='highlightRoute' id="routes"></routes>
@@ -18,7 +18,8 @@
 import routes from '@/components/Routes'
 import {apiBaseUrl} from '@/config.js'
 import {Route} from '@/Route.js'
-import businfo from '@/components/Businfo'
+import Businfo from '@/components/Businfo'
+import Stopinfo from '@/components/Stopinfo'
 
 
 export default {
@@ -42,11 +43,15 @@ export default {
     computed: {
         selectedBus: function(){
             return this.selectedRoute && this.selectedRoute.selectedBus
+        },
+        selectedStop: function(){
+           return this.selectedRoute && this.selectedRoute.selectedStop 
         }
     },
     components: {
         routes: routes,
-        businfo: businfo
+        businfo: Businfo,
+        stopinfo: Stopinfo
     },
     mounted: function(){
         this.map = new google.maps.Map(this.$refs["mainMap"], {

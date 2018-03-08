@@ -13,7 +13,10 @@ function resolve (dir) {
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    app: './src/main.js'
+    app: [
+        'babel-polyfill', // help out IE with things like native Promises
+        './src/main.js'
+    ]
   },
   output: {
     path: config.build.assetsRoot,

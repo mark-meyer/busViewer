@@ -1,21 +1,27 @@
 <template>
     <div id="routes"  v-bind:class="{menuOpen: menuOpen}">
         <div id="routeTab" @click='toggleopen'>{{tabText}}</div>
-        <h3>Routes</h3>
-        <ul>
-            <li 
-                @click='handleclick(route)' 
-                v-for='route in routes' 
-                v-bind:key='route.id'
-                v-bind:class='{selected:(selectedroute && selectedroute.id == route.id) }'
-            >
-            <span class="routeNumber" v-bind:style="{backgroundColor: route.color, borderColor: route.color}">{{route.id}}</span>{{route.name}}
-            </li>
-        </ul>
+        <div id="route_list" >        
+            <h3>{{heading}}</h3>
+            <ul>
+                <li 
+                    @click='pickeRoute(route)' 
+                    v-for='route in routes' 
+                    v-bind:key='route.id'
+                    v-bind:class='{selected:(selectedroute && selectedroute.id == route.id), noStop:(selectedroute && selectedroute.selectedStop && !(route.id in selectedroute.selectedStop.schedule))}'
+                >
+                <span class="routeNumber" v-bind:style="{backgroundColor: route.color, borderColor: route.color}">{{route.id}}</span>
+                <span class="routeName">{{route.name}}</span>
+                <stop_schedule :departures='selectedroute.selectedStop.schedule[route.id]' v-if="selectedroute && selectedroute.selectedStop && (route.id in selectedroute.selectedStop.schedule)"></stop_schedule>
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
 
 <script>
+import Stop_Schedule from '@/components/Stop_Schedule'
+import Stopinfo from '@/components/Stopinfo'
 
 export default {
     name: "Routes",
@@ -25,9 +31,12 @@ export default {
         }
     },
     props:['routes', 'selectedroute'],
-
+    components: {
+        stop_schedule: Stop_Schedule,
+        stopinfo: Stopinfo
+    },
     methods: {
-        handleclick(route){
+        pickeRoute(route){
             this.$emit('pickRoute', route)
             this.menuOpen = false
         },
@@ -37,7 +46,18 @@ export default {
     },
     computed: {
         tabText(){
-           return this.menuOpen ? 'Cancel' :  'Routes'
+        if(this.menuOpen){
+            return 'Close'
+        }
+        return this.selectedroute && this.selectedroute.selectedStop ? 'Times' :  'Routes'
+        },
+        selectedStop(){
+            return (this.selectedroute && this.selectedroute.selectedStop) ? this.selectedroute.selectedStop : undefined
+        },
+        heading(){
+            if (this.selectedStop) {
+                return 'Upcoming Buses'
+            } else { return "Routes"}
         }
     }
 }
@@ -54,10 +74,17 @@ export default {
         width: 18em;
         height: 100%;
         padding: 1em;
+        padding-bottom: 0;
         padding-right: 0;
         text-align: left;
         border-top: 5px solid #333;
         border-bottom: 5px solid #333;
+        
+    }
+    #route_list {
+        position: relative;
+        height: 100%;
+        overflow-y: scroll
     }
     #routeTab {
         cursor: pointer;
@@ -68,7 +95,7 @@ export default {
         border: 2px solid #ccc;
         background-color: #fff;
         z-index: 200;
-        top: 3em;
+        top: 4em;
         visibility: hidden;
         padding: .25em 1em .75em 1em;
         border-radius: 0 10px 0px 0;
@@ -82,6 +109,7 @@ export default {
     li {
         list-style: none;
         display:flex;
+        flex-wrap: wrap;
         align-items: center;
         margin-bottom: .25em;
         line-height: 150%;
@@ -89,8 +117,13 @@ export default {
     li.selected {
         font-weight: bold;
     }
-    li:hover {
+    li.noStop {
+        display: none;
+        opacity: .3;
+    }
+    .routeName:hover {
         color:firebrick;
+        cursor: pointer;
     }
     ul {
         padding: 0;
@@ -147,7 +180,7 @@ export default {
  }
   @media only screen  and (max-width : 680px) and (orientation : landscape){
     ul{
-        column-count: 2;
+        /*column-count: 2;*/
     }
 }
 </style>

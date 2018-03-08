@@ -27,6 +27,7 @@ class Route {
         this.stops = []
         this.buses = []
         this.selectedBus = undefined
+        this.selectedStop = undefined
     }
     select(){
         // a single route can have more than one polyline
@@ -45,55 +46,114 @@ class Route {
     showStops(){
         // We only need to get the stops from the API the first time
         if (this.stops.length){
-            this.stops.map(marker => marker.setMap(this.map))
+            this.stops.map(stop => stop.marker.setMap(this.map))
             return Promise.resolve()
         }
         else {
             return axios.get(`${apiBaseUrl}stops_on_route/${this.id}`)
             .then(r => {
-                this.stops = r.data.map(stop => 
-                    new google.maps.Marker({
-                        position: {lat: +stop.stop_lat, lng: +stop.stop_lon},
-                        map: this.map,
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 3,
-                            strokeColor: '#22aa66',
-                            strokeWeight: 2,
-                            fillColor:"#ffffff",
-                            fillOpacity: 1
-                        },
-                        title: stop.stop_name
-                    })
-                )
+                this.stops = r.data.map(stopdata => {
+                    let stop = new Stop(stopdata, this.map)
+                    stop.marker.addListener('click', () => this.selectStop(stop))
+                    return stop
+                })
             })
         } 
     }
     hideStops(){
-        this.stops.map(marker => marker.setMap(null))
+        this.stops.map(stop => stop.marker.setMap(null))
+    }
+    selectStop(stop){
+        this.deselectBus()
+        if (this.selectedStop && this.selectedStop.stopID == stop.stopID) {
+            this.deselectStop()
+            return Promise.resolve()
+        }
+        return axios.get(`${apiBaseUrl}stop_times/${stop.stopID}`)
+        .then(stop_times => {
+            this.deselectStop()
+            stop.schedule = stop_times.data.schedule
+            this.selectedStop = stop
+            this.selectedStop.select()
+            console.log("Stop Id selected: ", this.selectedStop)
+        })
+    }
+    deselectStop(){
+        if(this.selectedStop) this.selectedStop.deselect()
+        this.selectedStop = undefined
     }
     getBuses(){
         return axios.get(`${apiBaseUrl}buslocations/${this.id}`)
         .then(r => this.buses = r.data.map(item => new Bus(item, this)))
     }
     selectBus(bus){
+        this.deselectStop()
         if (this.selectedBus === bus) {
             // toggle current bus if user clicks it again
-            this.selectedBus = undefined
-            bus.deselect()
+            this.deselectBus()
         } else {
-            if (this.selectedBus) this.selectedBus.deselect()
+            if (this.selectedBus) this.deselectBus()
             this.selectedBus = bus
             bus.select()
         }     
     }
+    deselectBus(){
+        if(this.selectedBus) {
+            this.selectedBus.deselect()
+            this.selectedBus = undefined
+        }
+    }
     fitMapToRoute(){
         let bounds = new google.maps.LatLngBounds();
-        this.stops.forEach(stop => bounds.extend(stop.getPosition()) )
+        this.stops.forEach(stop => bounds.extend(stop.marker.getPosition()) )
         this.map.fitBounds(bounds)
     }
 }
-
+class Stop{
+    constructor(data, map) {
+        this.map = map
+        this.stopID = data.stop_id
+        this.coordinates = {lat: +data.stop_lat, lng: +data.stop_lon}
+        this.name = data.stop_name
+        this.url = data.stop_url
+        this.marker = new google.maps.Marker({
+            position: this.coordinates,
+            map: this.map,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 3,
+                strokeColor: '#22aa66',
+                strokeWeight: 2,
+                fillColor:"#ffffff",
+                fillOpacity: 1
+            },
+            title: this.name
+        })
+    }
+    select(){
+        this.marker.setIcon({
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 6,
+                strokeColor: '#22aa66',
+                strokeWeight: 2,
+                fillColor:"#ff2222",
+                fillOpacity: 1
+            }
+        )
+    }
+    deselect(){
+        console.log("deselect")
+        this.marker.setIcon({
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 3,
+            strokeColor: '#22aa66',
+            strokeWeight: 2,
+            fillColor:"#ffffff",
+            fillOpacity: 1
+            }
+        )
+    }
+}
 class Bus{
     constructor(data, route, map){
         this.route       = route
