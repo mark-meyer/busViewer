@@ -65,9 +65,15 @@ class Shapes extends GTFS_File {
 
 class Trips extends GTFS_File{
     processFile(data) {
+        this.data =  this.data  = data.reduce((a, c) => {
+            a[c.trip_id] = c
+            return a
+        }, {})
+
         // parsed data is indexed by route_id
-        // with trips array and shapes set
-        this.data  = data.reduce((a, c) => {
+        // with arrays of trips & shapes ids
+
+        this.data_by_route  = data.reduce((a, c) => {
             if (a[c.route_id]){
                 a[c.route_id].trips.push(c.trip_id)
                 a[c.route_id].shapes.add(c.shape_id)
@@ -77,6 +83,7 @@ class Trips extends GTFS_File{
             }
             return a
         }, {})
+        Object.values(this.data_by_route).map(v => v.shapes = [...v.shapes]) // convert set back to array
     }
 }
 
@@ -122,6 +129,20 @@ class Stop_Times extends GTFS_File{
         // each stop can be associated with multiple trips
         this.data.filter(stop => stop.stop_id = stop_id)
     }
+    scheduleAtStop(stop_id){
+        // returns an object {route_id: [stop_times]}
+        
+        return this.data.filter(stop => (stop.stop_id == stop_id ))
+        .reduce((a, c) => {
+            let [route_id, trip_id, direction, day_id] = c.trip_id.split('-')
+            if( a[route_id] ) {
+                a[route_id].push({trip_id: c.trip_id, departure_time: c.departure_time})
+            } else {
+                a[route_id] = [{trip_id: c.trip_id, departure_time: c.departure_time}]
+            }
+            return a
+        }, {})
+    }
 }
 class Stops extends GTFS_File{
     processFile(data) {
@@ -135,11 +156,12 @@ class Stops extends GTFS_File{
 class GTFS {
     constructor(directory){
         this._gtfs_directory = directory
-        this.shapes = new Shapes(directory + 'shapes.txt')
-        this.trips  = new Trips(directory + 'trips.txt')
-        this.routes = new Routes(directory + 'routes.txt')
-        this.stop_times = new Stop_Times(directory + 'stop_times.txt')
-        this.stops = new Stops(directory + 'stops.txt')
+        this.shapes          = new Shapes(directory + 'shapes.txt')
+        this.trips           = new Trips(directory + 'trips.txt')
+        this.routes          = new Routes(directory + 'routes.txt')
+        this.stop_times      = new Stop_Times(directory + 'stop_times.txt')
+        this.stops           = new Stops(directory + 'stops.txt')
+
         this.shapes.readfile()
         this.trips.readfile()
         this.routes.readfile()
@@ -148,12 +170,12 @@ class GTFS {
     }
 
     shapeFromRoute(routeID){
-        // return an array of shapes
-        let trip = this.trips[routeID]
-        return [...trip.shapes].map(id => this.shapes[id])
+        // A single Route can have more than one shape associated with it
+        let trip = this.trips.data_by_route[routeID]
+        return trip.shapes.map(id => this.shapes[id])
     }
     routeWithShape(routeID) {
-        let trip = this.trips[routeID]
+        let trip = this.trips.data_by_route[routeID]
         let shape = this.shapes[shape_id]
         let route = this.shapes[shape_id]
         route.shape = shape
@@ -167,7 +189,7 @@ class GTFS {
         // get trip IDs associate with route:
         // this should be calculated once and stored.
         // ps. gtfs is annoying
-        let trips = this.trips[routeID].trips
+        let trips = this.trips.data_by_route[routeID].trips
         let stopIDs = this.stop_times.data
                       .filter(item => trips.includes(item.trip_id))
                       .reduce((acc, item) => {
@@ -189,7 +211,22 @@ class GTFS {
         // Merge future stop_times and stop info for a particular trip id 
         return this.stop_times.futureStopsFromTrip(trip_id, route_id, direction).map(st => this.stops[st.stop_id])
     }
-    
+    stopInfo(stop_id){
+        // Returns stop name and time table according to GTFS
+        let now =  moment().tz('America/Anchorage')
+        let day_id = now.day() <= 5 ? 1 : day - 4
+
+        let stop_schedule = this.stop_times.scheduleAtStop(stop_id)
+        // filter out already passed times and add destination from trips
+        Object.entries(stop_schedule).forEach(([k, v]) => {
+            stop_schedule[k] = v.filter(stop_time => stop_time.departure_time >= now.format('HH:mm:ss')).slice(0,4)
+            .map(item => ({...item, ...{destination:this.trips[item.trip_id].trip_headsign}}))
+        })            
+        return {
+            info: this.stops[stop_id],
+            schedule: stop_schedule
+        }
+    }
 }
 
 const gtfs = new GTFS(raw_directory)

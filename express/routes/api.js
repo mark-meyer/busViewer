@@ -52,4 +52,8 @@ router.get('/route_stops/:trip_id/:route_id/:direction', function(req, res, next
     console.log("Direction: ", direction)
     res.send(JSON.stringify(gtfs.stopsOnTrip(trip_id, route_id, direction)))
 })
+router.get('/stop_times/:stop_id', function(req, res, next){
+    const stop_id = req.params.stop_id
+    res.send(JSON.stringify(gtfs.stopInfo(stop_id)))
+})
 module.exports = router;

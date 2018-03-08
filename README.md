@@ -1,12 +1,12 @@
 # bus-routes
 
-> Bus Route app. This has both an express server and a Vue single page app (SPA) that runs in the browser. The express app serves the API that the Vue app consumes. The epxress app also serves the actual Vue SPA to the browser on /.
+> Bus Route app. This runs an express server that serves an API and a Vue.js single page app (SPA) that runs in the browser and consumes this API.
 
-> The Vue app requires a webpack build to deploy. This transpiles ES6, and loads with .vue files. Running `npm run build` will build the Vue app for production and put the packeged files in the /dist directory. The express server will look here and server these files as static file to the browser.
+> The Vue app requires a webpack build to deploy. The deploy step transpiles ES6, and loads with .vue files, minifies, etc.. Running `npm run build` will build the Vue app for production and put the packeged files in the /dist directory. The express server will look here and serve these files as static files to the browser.
 
-> In development running `npm start` will start both the express server on port 3000 and the webpack dev server on port 8080. If you have previously built the Vue app, visiting http://localhost:3000/ will show the result of the build. Visiting http://localhost:8080 will show the currect live dev build using webpack's dev server. During development this has advantages: hot reloading and no required explicit build step. 
+> In development running `npm start` will start both the express server on port 3000 and the webpack dev server on port 8080. If you have previously built the Vue app, visiting http://localhost:3000/ will show the result of the build. Visiting http://localhost:8080 will show the currect live dev build using webpack's dev server. During development the Webpack server is convenient because it provides hot reloading and doesn't require an explicit build step. 
 
-> Both servers are running becuase even when using the Webpack dev server the Vue app needs to hit the API for GTFS information and this is serverd by express.
+> Both servers are running because even when using the Webpack dev server the Vue app still needs to hit the API for GTFS information and this is serverd by express on port 3000.
 
 ## Build Setup
 
@@ -15,6 +15,7 @@
 npm install
 
 # serve with hot reload at localhost:8080
+# express API at 3000
 npm run dev
 
 # build for production with minification
