@@ -1,6 +1,6 @@
 <template>
     <div id="busInfo">
-        <div id="number" v-bind:style="{borderColor: bus.route.color}">{{bus.route.id}}</div> 
+        <div id="number" v-bind:style="{borderColor: bus.color}">{{bus.routeNumber}}</div> 
         <div id="tripInfo">
             <p><b>{{bus.destination}}</b> <br>
                 {{direction}} | {{bus.opStatus}}

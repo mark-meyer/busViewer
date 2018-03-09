@@ -8,7 +8,10 @@ import {apiBaseUrl} from './config.js'
 class Route {
     static getRoutes(map){
         return axios.get(`${apiBaseUrl}routes`)
-        .then(routes => routes.data.map(route => new Route(route, map)))
+        .then(routes => routes.data.reduce((obj, route) => {
+            obj[route.route_id] = new Route(route, map)
+            return obj
+        }, {}))
     }
     constructor(data, map) {
         this.map       = map
@@ -35,7 +38,6 @@ class Route {
         this.showStops()
         .then(() => this.fitMapToRoute())
         this.getBuses()
-
     }
     deselect(){
         this.polylines.map(line => line.setOptions({strokeOpacity: 0.3}))
@@ -84,15 +86,22 @@ class Route {
     }
     getBuses(){
         return axios.get(`${apiBaseUrl}buslocations/${this.id}`)
-        .then(r => this.buses = r.data.map(item => new Bus(item, this)))
+        .then(r => {
+            this.buses = r.data.map(item => {
+                let bus = new Bus(item, this, this.map)
+                bus.marker.addListener('click', () => this.selectBus(bus))
+                return bus
+            })
+        })
     }
     selectBus(bus){
+        this.hideStops()
         this.deselectStop()
-        if (this.selectedBus === bus) {
-            // toggle current bus if user clicks it again
+        if (this.selectedBus === bus) { // toggle current bus if user clicks it again
+            this.showStops()
             this.deselectBus()
         } else {
-            if (this.selectedBus) this.deselectBus()
+            this.deselectBus()
             this.selectedBus = bus
             bus.select()
         }     
@@ -156,8 +165,9 @@ class Stop{
 }
 class Bus{
     constructor(data, route, map){
-        this.route       = route
-        this.map         = route.map
+       // this.route       = route
+        this.map         = map
+        this.color       = route.color
         this.selected    = false
         this.laststop    = data.laststop
         this.direction   = data.direction
@@ -168,26 +178,25 @@ class Bus{
         this.stops       = []
         this.marker = new google.maps.Marker({
             position: {lat: +data.latitude, lng: +data.longitude},
-            map: this.route.map,
+            map: this.map,
             zIndex: google.maps.Marker.MAX_ZINDEX + 1,
             icon: this.icon(),
             label: this.label(),
             title: data.destination
         })
-        this.marker.addListener('click', () => this.route.selectBus(this))
         this.chaseInterval = undefined
         this.stopIcon = {
             path: google.maps.SymbolPath.CIRCLE,
             scale: 3,
-            strokeColor: this.route.color,
+            strokeColor: this.color,
             strokeWeight: 2,
-            fillColor: this.route.color,
+            fillColor: this.color,
             fillOpacity: 1
         }
         this.chaseIcon =  {
             path: google.maps.SymbolPath.CIRCLE,
             scale: 3,
-            strokeColor: this.route.color,
+            strokeColor: this.color,
             strokeWeight: 2,
             fillColor:  "#ffffff",
             fillOpacity: .5
@@ -201,7 +210,6 @@ class Bus{
         this.selected = true
         this.marker.setIcon(this.icon())
         this.marker.setLabel(this.label())
-        this.route.hideStops()
         this.showStops()
     }
     deselect() {
@@ -209,15 +217,14 @@ class Bus{
         this.marker.setIcon(this.icon())
         this.marker.setLabel(this.label())
         this.hideStops()
-        this.route.showStops()
     }
     icon(){
         return {
             path: google.maps.SymbolPath.CIRCLE,
             scale: 10,
-            strokeColor: this.route.color,
+            strokeColor: this.color,
             strokeWeight: 2,
-            fillColor: this.selected ? this.route.color : "#ffffff",
+            fillColor: this.selected ? this.color : "#ffffff",
             fillOpacity: 1       
         }
     }    
@@ -233,27 +240,20 @@ class Bus{
         let url = `${apiBaseUrl}route_stops/${this.tripID}/${this.routeNumber}/${this.direction}`
         return axios.get(url)
         .then(r => {
-            this.stops = r.data.map(stop => {
-                return new google.maps.Marker({
-                    position: {lat: +stop.stop_lat, lng: +stop.stop_lon},
-                    map: this.map,
-                    icon: this.stopIcon,
-                    title: stop.stop_name
-                })
-             })
+            this.stops = r.data.map(stop => new Stop(stop,this.map))
             this.startChase()
         })
     }
     hideStops(){
         this.stopChase()
-        this.stops.map(stop => stop.setMap(null))
+        this.stops.map(stop => stop.marker.setMap(null))
     }
     startChase(){
         let count = 0
         this.chaseInterval = setInterval(() => {
-            this.stops.forEach(stop =>  stop.setIcon(this.stopIcon)) 
+            this.stops.forEach(stop =>  stop.marker.setIcon(this.stopIcon)) 
             this.stops.filter((s, i) => i % 8 === count % 8 )
-            .forEach(stop =>  stop.setIcon(this.chaseIcon))
+            .forEach(stop =>  stop.marker.setIcon(this.chaseIcon))
             count++
         }, 100)
     }

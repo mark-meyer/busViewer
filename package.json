@@ -10,7 +10,8 @@
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
-    "build": "node front_end_vue/build/build.js"
+    "build": "node front_end_vue/build/build.js",
+    "generate-icons": "vsvg -s ./svg-icons -t ./front_end_vue/src/compiled-icons"
   },
   "dependencies": {
     "axios": "^0.18.0",
@@ -81,6 +82,7 @@
     "url-loader": "^0.5.8",
     "vue-loader": "^13.3.0",
     "vue-style-loader": "^3.0.1",
+    "vue-svgicon": "^2.1.3",
     "vue-template-compiler": "^2.5.2",
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.9.0",

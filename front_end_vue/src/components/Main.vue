@@ -3,10 +3,15 @@
         <div id="header">
             <div v-if="noSelection" id="circle_a" >A</div> <h1 v-if="noSelection"> Anchorage Buses</h1>
             <businfo :bus='selectedBus' v-if="selectedBus" ></businfo>
-            <stopinfo id="stopInfo" v-if="selectedStop" :stop="selectedStop"></stopinfo>
+            <stopinfo id="stopInfo" v-if="selectedStop" :stop="selectedStop"></stopinfo> 
         </div>
         <div id="root">
-            <routes :selectedroute='selectedRoute' :routes='routes' v-on:pickRoute='highlightRoute' id="routes"></routes>
+            <infopanel 
+                :selectedroute='selectedRoute' 
+                :routes='routes' 
+                v-on:pickRoute='highlightRoute' 
+                v-on:closeInfo='deselect'
+            ></infopanel>
             <div id="holder">
                 <div ref="mainMap" id="mainMap"></div>
             </div>
@@ -20,7 +25,7 @@ import {apiBaseUrl} from '@/config.js'
 import {Route} from '@/Route.js'
 import Businfo from '@/components/Businfo'
 import Stopinfo from '@/components/Stopinfo'
-
+import InfoPanel from '@/components/InfoPanel'
 
 export default {
     name: 'Main',
@@ -33,12 +38,19 @@ export default {
     },
     methods:{
         highlightRoute(route) {
+            console.log(this.routes)
             if (this.selectedRoute){
                 this.selectedRoute.deselect()
             } 
             this.selectedRoute = route
             this.selectedRoute.select()
+        },
+        deselect(){
+            if(this.selectedRoute){
+                this.selectedRoute.deselectStop()
+            }
         }
+
     },
     computed: {
         selectedBus: function(){
@@ -54,7 +66,8 @@ export default {
     components: {
         routes: routes,
         businfo: Businfo,
-        stopinfo: Stopinfo
+        stopinfo: Stopinfo,
+        infopanel: InfoPanel
     },
     mounted: function(){
         this.map = new google.maps.Map(this.$refs["mainMap"], {
@@ -88,7 +101,9 @@ export default {
     #mainMap {
         height: 100%;
         width: 100%;
-        min-width: 300px;    
+        min-width: 300px;   
+        border-left: 2px solid #fafafa;
+ 
     } 
     #header {
         position: relative;

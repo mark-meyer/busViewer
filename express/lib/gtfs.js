@@ -184,8 +184,7 @@ class GTFS {
         return route
     }
     allRoutes(){
-        return Object.keys(this.routes.data).map(route => ({...this.routes[route], shapes: this.shapeFromRoute(route) })
-        )
+        return Object.keys(this.routes.data).map(route => ({...this.routes[route], shapes: this.shapeFromRoute(route) }))
     }
     allStopsOnRoute(routeID){
         // get trip IDs associate with route:
