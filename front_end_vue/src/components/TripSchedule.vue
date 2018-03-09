@@ -39,7 +39,7 @@ export default {
         to12Hour(value) {
             let [hour, min, seconds] = value.split(':')
             hour = hour % 12 == 0 ? 12 : hour % 12 
-            return `${hour}:${min} ${hour > 11 ? 'PM' : 'AM'}`
+            return `${hour}:${min}`
         }
     }
 }
