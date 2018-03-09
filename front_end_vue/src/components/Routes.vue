@@ -52,4 +52,9 @@ export default {
         fill: none;
         stroke: currentColor;
     }
+    @media only screen  and (max-width : 680px) {
+    #route_list{
+      
+    }
+    }
 </style>

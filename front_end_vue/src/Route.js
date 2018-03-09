@@ -77,7 +77,6 @@ class Route {
             stop.schedule = stop_times.data.schedule
             this.selectedStop = stop
             this.selectedStop.select()
-            console.log("Stop Id selected: ", this.selectedStop)
         })
     }
     deselectStop(){
@@ -98,7 +97,6 @@ class Route {
         this.hideStops()
         this.deselectStop()
         if (this.selectedBus === bus) { // toggle current bus if user clicks it again
-            this.showStops()
             this.deselectBus()
         } else {
             this.deselectBus()
@@ -108,6 +106,7 @@ class Route {
     }
     deselectBus(){
         if(this.selectedBus) {
+            this.showStops()
             this.selectedBus.deselect()
             this.selectedBus = undefined
         }
@@ -125,6 +124,7 @@ class Stop{
         this.coordinates = {lat: +data.stop_lat, lng: +data.stop_lon}
         this.name = data.stop_name
         this.url = data.stop_url
+        this.departure_time = data.departure_time
         this.marker = new google.maps.Marker({
             position: this.coordinates,
             map: this.map,
@@ -151,7 +151,6 @@ class Stop{
         )
     }
     deselect(){
-        console.log("deselect")
         this.marker.setIcon({
             path: google.maps.SymbolPath.CIRCLE,
             scale: 3,
@@ -240,6 +239,7 @@ class Bus{
         let url = `${apiBaseUrl}route_stops/${this.tripID}/${this.routeNumber}/${this.direction}`
         return axios.get(url)
         .then(r => {
+            console.log(r.data)
             this.stops = r.data.map(stop => new Stop(stop,this.map))
             this.startChase()
         })

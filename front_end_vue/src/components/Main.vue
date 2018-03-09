@@ -48,6 +48,7 @@ export default {
         deselect(){
             if(this.selectedRoute){
                 this.selectedRoute.deselectStop()
+                this.selectedRoute.deselectBus()
             }
         }
 

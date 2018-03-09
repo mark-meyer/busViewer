@@ -2,8 +2,9 @@
     <div id="panel"  v-bind:class="{menuOpen: menuOpen}">
         <div id="panelTab" @click='toggleopen'>{{tabText}}</div> 
         <div id='container'>               
-            <routes v-if="!(selectedroute && selectedroute.selectedStop)" :routes='routes' :selectedroute='selectedroute' @pickRoute='pickRoute'></routes> 
+            <routes v-if="showRoutes" :routes='routes' :selectedroute='selectedroute' @pickRoute='pickRoute'></routes> 
             <stop_schedule :stop='selectedroute.selectedStop' :routes='routes' v-if="selectedroute && selectedroute.selectedStop" @close="closeSchedule()"></stop_schedule>   
+            <trip_schedule :bus='selectedroute.selectedBus' v-if="selectedroute && selectedroute.selectedBus" @close="closeSchedule()"></trip_schedule>
         </div>
     </div>
 </template>
@@ -11,6 +12,7 @@
 <script>
 import Stop_Schedule from '@/components/Stop_Schedule'
 import Routes from '@/components/Routes'
+import TripSchedule from '@/components/TripSchedule'
 
 export default {
     name: "Routes",
@@ -22,6 +24,7 @@ export default {
     props:['routes', 'selectedroute'],
     components: {
         stop_schedule: Stop_Schedule,
+        trip_schedule: TripSchedule,
         routes: Routes
     },
     methods: {
@@ -33,6 +36,7 @@ export default {
           this.menuOpen = !this.menuOpen
         },
         closeSchedule(){
+            console.log("closing")
             this.menuOpen = false;
             this.$emit('closeInfo')
         }
@@ -43,10 +47,15 @@ export default {
         if(this.menuOpen){
             return 'Close'
         }
-        return this.selectedroute && this.selectedroute.selectedStop ? 'Times' :  'Routes'
+        if (this.showRoutes) return "Routes"
+        return this.selectedroute && this.selectedroute.selectedStop ? 'Times' :  'Schedule'
         },
         selectedStop(){
             return (this.selectedroute && this.selectedroute.selectedStop) ? this.selectedroute.selectedStop : undefined
+        },
+        showRoutes(){
+            if (!this.selectedroute) return true
+            return !(this.selectedroute.selectedStop || this.selectedroute.selectedBus )
         }      
     }
 }

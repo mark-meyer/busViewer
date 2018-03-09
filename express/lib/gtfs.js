@@ -206,7 +206,9 @@ class GTFS {
     }
     stopsOnTrip(trip_id, route_id, direction){
         // Merge stop_times and stop info for a particular trip id
-        return this.stop_times.stopsFromTrip(trip_id, route_id, direction).map(st => this.stops[st.stop_id])
+        return this.stop_times.stopsFromTrip(trip_id, route_id, direction).map(st => {
+            return {...this.stops[st.stop_id], ...{departure_time: st.departure_time}}
+        })
     }
     upcomingStopsOnTrip(trip_id, route_id, direction){
         // Merge future stop_times and stop info for a particular trip id 

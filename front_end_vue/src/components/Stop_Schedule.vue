@@ -58,7 +58,7 @@ export default {
         font-weight: normal;
         font-size: .85em;       
     }
-     .svg-icon {
+    .svg-icon {
         display: inline-block;
         width: 16px;
         height: 16px;
