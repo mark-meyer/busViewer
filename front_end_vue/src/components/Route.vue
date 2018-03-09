@@ -8,11 +8,6 @@
 <script>
 export default {
     props: ['route', 'selected'],
-    methods:{
-        pickRoute(route){
-            console.log("route picked: ", route)
-        }
-    }
 }
 </script>
 

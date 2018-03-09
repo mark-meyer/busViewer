@@ -20,8 +20,6 @@
 </template>
 
 <script>
-import routes from '@/components/Routes'
-import {apiBaseUrl} from '@/config.js'
 import {Route} from '@/Route.js'
 import Businfo from '@/components/Businfo'
 import Stopinfo from '@/components/Stopinfo'
@@ -38,7 +36,6 @@ export default {
     },
     methods:{
         highlightRoute(route) {
-            console.log(this.routes)
             if (this.selectedRoute){
                 this.selectedRoute.deselect()
             } 
@@ -52,12 +49,9 @@ export default {
                 } else {
                     this.selectedRoute.showStops()
                     this.selectedRoute.deselectBus()
-                }
-                
-                
+                }          
             }
         }
-
     },
     computed: {
         selectedBus: function(){
@@ -71,7 +65,6 @@ export default {
         }
     },
     components: {
-        routes: routes,
         businfo: Businfo,
         stopinfo: Stopinfo,
         infopanel: InfoPanel
@@ -110,7 +103,6 @@ export default {
         width: 100%;
         min-width: 300px;   
         border-left: 2px solid #fafafa;
- 
     } 
     #header {
         position: relative;
@@ -132,7 +124,6 @@ export default {
         margin: 0px 20px 20px 20px;
         font-weight: bold;
     }
-   
     #root{
         position: absolute;
         top: 6.5em;
@@ -146,7 +137,7 @@ export default {
     a {
         color: #42b983;
     }
- @media only screen  and (max-width : 680px) {
+    @media only screen  and (max-width : 680px) {
         #header {
             align-items: baseline;
             margin-top: .5em;

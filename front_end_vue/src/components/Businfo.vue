@@ -17,13 +17,9 @@ export default {
     props: ['bus'],
     computed:{
         direction(){
-            return this.bus.direction == 'O'
-            ? "Outbound"
-            : "Inbound"
+            const directions = {O: "Outbound", I:"Inbound" } // Govnm't Hill Bus reports 'L' in direction. Don't know how to interpret that
+            return directions[this.bus.direction]
         },
-    },
-    mounted(){
-        console.log(this.bus)
     }
 }
 </script>
@@ -41,7 +37,7 @@ export default {
         text-align: center;
         font-weight: bold;
     }
-    #busInfo{
+    #busInfo {
         position: absolute;
         text-align: left;
         background-color: white;
@@ -49,10 +45,10 @@ export default {
         height: 100%;  
         width: 100%;
     }   
-    #tripInfo{
+    #tripInfo {
        font-size: .85em;
     }
-    p{
+    p {
         margin-top: .25em;
     }
 
@@ -65,7 +61,6 @@ export default {
             margin-top:0px;
             padding: .25em;
             flex-shrink:0;
-
         }
         #busInfo{
             position: absolute;
@@ -74,8 +69,6 @@ export default {
             padding:.25em;
         }
         p {margin-top: 0}
-        #tripInfo{
-        font-size: .75em;
-        }
+        #tripInfo {font-size: .75em;}
     }
 </style>

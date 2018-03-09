@@ -2,9 +2,9 @@
     <div id="panel"  v-bind:class="{menuOpen: menuOpen}">
         <div id="panelTab" @click='toggleopen'>{{tabText}}</div> 
         <div id='container'>               
-            <routes v-if="showRoutes" :routes='routes' :selectedroute='selectedroute' @pickRoute='pickRoute'></routes> 
-            <stop_schedule :stop='selectedroute.selectedStop' :routes='routes' v-if="selectedroute && selectedroute.selectedStop" @close="closeSchedule()"></stop_schedule>   
-            <trip_schedule :bus='selectedroute.selectedBus' v-if="selectedroute && selectedroute.selectedBus" @close="closeSchedule()"></trip_schedule>
+            <routes v-if="showRoutes" :routes='routes' :selectedroute='selectedroute'  @mounted="setTab" @pickRoute='pickRoute'></routes> 
+            <stop_schedule :stop='selectedroute.selectedStop'  :routes='routes' v-if="selectedroute && selectedroute.selectedStop" @mounted="setTab" @close="closeSchedule()"></stop_schedule>   
+            <trip_schedule :bus='selectedroute.selectedBus' v-if="selectedroute && selectedroute.selectedBus"  @mounted="setTab" @close="closeSchedule()"></trip_schedule>
         </div>
     </div>
 </template>
@@ -15,10 +15,11 @@ import Routes from '@/components/Routes'
 import TripSchedule from '@/components/TripSchedule'
 
 export default {
-    name: "Routes",
+    name: "InfoPanel",
     data: function(){
         return {
-            menuOpen: false
+            menuOpen: false,
+            tabText: "Routes"
         }
     },
     props:['routes', 'selectedroute'],
@@ -33,23 +34,17 @@ export default {
             this.menuOpen = false
         },
         toggleopen(){
-          this.menuOpen = !this.menuOpen
+            this.menuOpen = !this.menuOpen
         },
         closeSchedule(){
-            console.log("closing")
             this.menuOpen = false;
             this.$emit('closeInfo')
+        },
+        setTab(value){
+            this.tabText = value
         }
-
     },
     computed: {
-        tabText(){
-        if(this.menuOpen){
-            return 'Close'
-        }
-        if (this.showRoutes) return "Routes"
-        return this.selectedroute && this.selectedroute.selectedStop ? 'Times' :  'Schedule'
-        },
         selectedStop(){
             return (this.selectedroute && this.selectedroute.selectedStop) ? this.selectedroute.selectedStop : undefined
         },
@@ -108,8 +103,7 @@ export default {
     .closeBox {
         display: inline-block;
         font-size: .75em;
-        padding-left:.2em;
-        
+        padding-left:.2em; 
         background-color: #aaa;
         color: #eee;
         height: 1.4em;
@@ -117,21 +111,12 @@ export default {
         border-radius: 50%;
     }
    
-    li.noStop {
-        display: none;
-        opacity: .3;
-    }
-    
  @media only screen  and (max-width : 680px) {
-     #panelTab {
-         visibility: visible;
-     }
-     li{
-         display: block;
-     }
-     h3 {
-         margin-top: 0px;
-     }
+    #panelTab {
+        visibility: visible;
+    }
+    li { display: block; }
+    h3 { margin-top: 0px; }
      
     #panel {
         left: -100%;
@@ -153,9 +138,4 @@ export default {
         padding: .75em 1em .5em 1em
     }
  }
-  @media only screen  and (max-width : 680px) and (orientation : landscape){
-    ul{
-        /*column-count: 2;*/
-    }
-}
 </style>

@@ -31,7 +31,7 @@ export default {
     },
     components:{route: Route},
     mounted(){
-        console.log(this.routes)
+        this.$emit("mounted", 'Times')
     },
     methods: {
         close() {
@@ -48,7 +48,6 @@ export default {
     #stopInfo{
         overflow-y: scroll;
         height: 100%;
-       
     }
     .routeBlock{
         margin-bottom: 1em;

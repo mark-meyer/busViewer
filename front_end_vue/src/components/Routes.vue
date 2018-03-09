@@ -13,16 +13,16 @@ import '../compiled-icons/bus'
 
 export default {
     props:['routes', 'selectedroute'],
-     methods: {
+    methods: {
         pickRoute(route){
-            console.log("route picked: ", route)
             this.$emit('pickRoute', route)
             this.menuOpen = false
         }
      },
-     components:{
-         route: Route
-     }
+    components:{ route: Route },
+    mounted(){
+        this.$emit("mounted", 'Routes')
+    }
 }
 </script>
 
@@ -51,10 +51,5 @@ export default {
         vertical-align: middle;
         fill: none;
         stroke: currentColor;
-    }
-    @media only screen  and (max-width : 680px) {
-    #route_list{
-      
-    }
     }
 </style>

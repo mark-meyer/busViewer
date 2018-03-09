@@ -21,13 +21,9 @@ import '../compiled-icons/close'
 export default {
     props:['bus'],
     methods:{
-        close(){
-            this.$emit('close')
-        }
+        close(){this.$emit('close')}
     },
-    mounted(){
-        console.log(this.bus)
-    },
+    mounted(){ this.$emit("mounted", 'Schedule')},
     filters: {
         removeCaps(str) {
             let directions = ['ESE', 'ENE', 'NNW', 'SSW', 'SSE', 'WNW', 'NNE', 'WSW']
