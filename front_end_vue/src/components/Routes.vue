@@ -1,11 +1,9 @@
 <template>
-    <div id="route_list" > 
-        <div id="routes">
-            <h3>
-                <svgicon icon="bus" width="2em" height="2em" color="#333"></svgicon> Routes
-            </h3>
-            <route v-for='route in routes' :selected='selectedroute && route.id == selectedroute.id' :route='route' v-bind:key='route.id' @click.native='pickRoute(route)' ></route>
-        </div>
+    <div id="route_list" >  
+        <h3>
+            <svgicon icon="bus" width="2em" height="2em" color="#333"></svgicon> Routes
+        </h3>
+        <route class="routeName" v-for='route in routes' :selected='selectedroute && route.id == selectedroute.id' :route='route' v-bind:key='route.id' @click.native='pickRoute(route)' ></route>
     </div>
 </template>
 
@@ -29,19 +27,18 @@ export default {
 </script>
 
 <style scoped>
+    h3 {
+        margin-top: .5em;
+    }
     #route_list {
         position: relative;
         height: 100%;
         overflow-y: scroll;
         -ms-overflow-style: none;
     }
-    #routes {
-        padding: 0;
-        line-height: 180%;
-        overflow-y: scroll;
-        margin-top: .5em
+    .routeName {
+        margin-bottom: .5em;
     }
-    
     .routeName:hover {
         color:firebrick;
         cursor: pointer;

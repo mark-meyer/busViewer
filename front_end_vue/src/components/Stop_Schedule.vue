@@ -33,10 +33,6 @@ export default {
     mounted(){
         console.log(this.routes)
     },
-    computed: {
-        routesAtStop(){
-        }
-    },
     methods: {
         close() {
             this.$emit('close')

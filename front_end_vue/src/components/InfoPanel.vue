@@ -1,8 +1,10 @@
 <template>
     <div id="panel"  v-bind:class="{menuOpen: menuOpen}">
-        <div id="panelTab" @click='toggleopen'>{{tabText}}</div>                
-        <routes v-if="!(selectedroute && selectedroute.selectedStop)" :routes='routes' :selectedroute='selectedroute' @pickRoute='pickRoute'></routes> 
-        <stop_schedule :stop='selectedroute.selectedStop' :routes='routes' v-if="selectedroute && selectedroute.selectedStop" @close="closeSchedule()"></stop_schedule>   
+        <div id="panelTab" @click='toggleopen'>{{tabText}}</div> 
+        <div id='container'>               
+            <routes v-if="!(selectedroute && selectedroute.selectedStop)" :routes='routes' :selectedroute='selectedroute' @pickRoute='pickRoute'></routes> 
+            <stop_schedule :stop='selectedroute.selectedStop' :routes='routes' v-if="selectedroute && selectedroute.selectedStop" @close="closeSchedule()"></stop_schedule>   
+        </div>
     </div>
 </template>
 
@@ -66,7 +68,7 @@ export default {
         text-align: left;
         border-top: 5px solid #333;
         border-bottom: 5px solid #333;
-         -ms-overflow-style: none;
+        -ms-overflow-style: none;
     }
     
     #panelTab {
@@ -85,6 +87,11 @@ export default {
     }
     #panelTab:hover{
         border-color: #f1f118;
+    }
+     #container {
+        height: 100%;
+        padding: 0;
+        overflow-y: scroll;
     }
     h3 {
          margin-top:.5em
