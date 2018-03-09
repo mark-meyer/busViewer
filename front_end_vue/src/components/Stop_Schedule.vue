@@ -1,7 +1,7 @@
 <template>
     <div id="schedule">
         <div v-for='departure in departures' v-bind:key="departure.trip_id">
-        {{departure.departure_time}} - {{departure.destination}}
+        {{departure.departure_time | to12Hour}} - {{departure.destination}}
         </div>
     </div>
     
@@ -9,7 +9,13 @@
 
 <script>
 export default {
-    props:['departures']
+    props:['departures'],
+    filters: {
+        to12Hour(value) {
+            let [hour, min, seconds] = value.split(':')
+            return `${hour % 12}:${min} ${hour > 12 ? 'PM' : 'AM'}`
+        }
+    }
 }
 </script>
 

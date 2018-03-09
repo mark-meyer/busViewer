@@ -110,17 +110,16 @@ class Stop_Times extends GTFS_File{
     }
     futureStopsFromTrip(trip, route_id, direction){
         // all the stops along a particular trip that are scheduled after now
-        let now =  moment().tz('America/Anchorage')
-        let day_id = now.day() <= 5 ? 1 : day - 4
-        const trip_id = [route_id, trip, direction, day_id].join('-')
-        return this.data.filter(stop => {
-            /* The bus XML file doesn't give a complete trip_id (i.e. 10-610-I-1)
+        /* The bus XML file doesn't give a complete trip_id (i.e. 10-610-I-1)
                It only gives the second value. The rest can be deduced:
                route_id-id-direction-service_id
                The service_id comes from the calendar: 1 = weekdays, 2 = saturday, 3 = sunday
                To unambigously find stops we need short trip_id and direction.
-            */
-            //let [route, shortId, direction_code, service_id] = stop.trip_id.split('-') // the bus xml doesn't provide the full trip id
+        */
+        let now =  moment().tz('America/Anchorage')
+        let day_id = now.day() <= 5 ? 1 : day - 4
+        const trip_id = [route_id, trip, direction, day_id].join('-')
+        return this.data.filter(stop => {
             return (stop.trip_id == trip_id 
                     && stop.departure_time >= now.format('HH:mm:ss'))
         })
@@ -131,10 +130,13 @@ class Stop_Times extends GTFS_File{
     }
     scheduleAtStop(stop_id){
         // returns an object {route_id: [stop_times]}
-        
+        let now =  moment().tz('America/Anchorage')
+        let today_id = now.day() <= 5 ? 1 : day - 4
+
         return this.data.filter(stop => (stop.stop_id == stop_id ))
         .reduce((a, c) => {
             let [route_id, trip_id, direction, day_id] = c.trip_id.split('-')
+            if (today_id != day_id) return a //only today's times
             if( a[route_id] ) {
                 a[route_id].push({trip_id: c.trip_id, departure_time: c.departure_time})
             } else {
