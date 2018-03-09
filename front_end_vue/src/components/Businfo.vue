@@ -21,6 +21,9 @@ export default {
             ? "Outbound"
             : "Inbound"
         },
+    },
+    mounted(){
+        console.log(this.bus)
     }
 }
 </script>

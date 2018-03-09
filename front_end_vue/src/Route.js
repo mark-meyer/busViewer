@@ -94,19 +94,19 @@ class Route {
         })
     }
     selectBus(bus){
-        this.hideStops()
         this.deselectStop()
         if (this.selectedBus === bus) { // toggle current bus if user clicks it again
             this.deselectBus()
+            this.showStops()
         } else {
+            this.hideStops()
             this.deselectBus()
             this.selectedBus = bus
             bus.select()
         }     
     }
     deselectBus(){
-        if(this.selectedBus) {
-            this.showStops()
+        if(this.selectedBus) {         
             this.selectedBus.deselect()
             this.selectedBus = undefined
         }
