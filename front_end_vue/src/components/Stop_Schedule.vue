@@ -25,8 +25,9 @@ export default {
     filters: {
         to12Hour(value) {
             let [hour, min, seconds] = value.split(':')
+            const ampm = hour > 11 ? 'PM' : 'AM'
             hour = hour % 12 == 0 ? 12 : hour % 12 
-            return `${hour}:${min} ${hour > 11 ? 'PM' : 'AM'}`
+            return `${hour}:${min} ${ampm}`
         }
     },
     components:{route: Route},
