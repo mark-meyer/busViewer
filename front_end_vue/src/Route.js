@@ -239,7 +239,6 @@ class Bus{
         let url = `${apiBaseUrl}route_stops/${this.tripID}/${this.routeNumber}/${this.direction}`
         return axios.get(url)
         .then(r => {
-            console.log(r.data)
             this.stops = r.data.map(stop => new Stop(stop,this.map))
             this.startChase()
         })
