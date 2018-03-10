@@ -57,7 +57,9 @@ export default {
 </script>
 
 <style scoped>
-    
+    #container {
+        border-right: 2px solid #fafafa;
+    }
     #panel {
         position:absolute;
         left: 0;
@@ -66,9 +68,8 @@ export default {
         background-color: #eeeeee;
         width: 18em;
         height: 100%;
-        padding: 1em;
-        padding-bottom: 0;
-        padding-right: 0;
+        padding: 0;
+        padding-left: 1em;
         text-align: left;
         border-top: 5px solid #333;
         border-bottom: 5px solid #333;
@@ -119,6 +120,7 @@ export default {
     h3 { margin-top: 0px; }
      
     #panel {
+        position: relative;
         left: -100%;
         background-color:#fefefe;
         transition: left .5s;

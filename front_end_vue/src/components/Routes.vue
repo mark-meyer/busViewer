@@ -28,7 +28,7 @@ export default {
 
 <style scoped>
     h3 {
-        margin-top: .5em;
+        margin-top: 1em;
     }
     #route_list {
         position: relative;

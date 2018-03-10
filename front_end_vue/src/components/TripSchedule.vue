@@ -48,6 +48,9 @@ export default {
         padding:0;
         width: 100%;
     }
+    h3{
+        margin-top: 1em;
+    }
     #stopInfo{
         padding-right: 1em;
     }

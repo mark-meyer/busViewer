@@ -1,17 +1,20 @@
 <template>
     <div>
+        
         <div id="header">
             <div v-if="noSelection" id="circle_a" >A</div> <h1 v-if="noSelection"> Anchorage Buses</h1>
             <businfo :bus='selectedBus' v-if="selectedBus" ></businfo>
             <stopinfo id="stopInfo" v-if="selectedStop" :stop="selectedStop"></stopinfo> 
         </div>
+       
         <div id="root">
-            <infopanel 
+           <infopanel 
                 :selectedroute='selectedRoute' 
                 :routes='routes' 
                 v-on:pickRoute='highlightRoute' 
                 v-on:closeInfo='deselect'
             ></infopanel>
+            
             <div id="holder">
                 <div ref="mainMap" id="mainMap"></div>
             </div>
@@ -93,16 +96,19 @@ export default {
         position: absolute;
         left: 18em;
         right: 0;
+        top: 0;
+        bottom: 0;
         height: 100%;
         border-top: 5px solid #333;
         border-bottom: 5px solid #333;
-        box-sizing: border-box;
+        box-sizing: border-box; 
     }
     #mainMap {
+        position: relative;
         height: 100%;
         width: 100%;
-        min-width: 300px;   
-        border-left: 2px solid #fafafa;
+       /* min-width: 300px; */  
+       
     } 
     #header {
         position: relative;
