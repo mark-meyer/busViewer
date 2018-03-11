@@ -36,7 +36,8 @@ export default {
         },
         closeSchedule(){
             this.menuOpen = false;
-            this.$emit('closeInfo')
+            this.$store.commit('unsetSelected')
+            //this.$emit('closeInfo')
         },
         setTab(value){
             this.tabText = value

@@ -17,7 +17,7 @@
 <script>
 import { mapState } from 'vuex'
 
-import {Route} from '@/Route.js'
+import {setMap} from '@/GTFSMap.js'
 import Businfo from '@/components/Businfo'
 import Stopinfo from '@/components/Stopinfo'
 import InfoPanel from '@/components/InfoPanel'
@@ -52,8 +52,8 @@ export default {
         const styledMapType = new google.maps.StyledMapType(require("../mapstyles.js"))
         gMap.mapTypes.set('styled_map', styledMapType);
         gMap.setMapTypeId('styled_map');
+        setMap(gMap)
 
-        this.$store.commit('setMap', gMap)
         this.$store.dispatch('getRoutes')
     }
 }

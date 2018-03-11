@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {Route, Stop, Bus} from '../Route.js'
+import {Route, Stop, Bus} from '../GTFSMap.js'
 Vue.use(Vuex)
 
 import axios from 'axios'
@@ -10,15 +10,11 @@ export default new Vuex.Store({
     state:{
         routes: [],
         selected: undefined,
-        currentRoute: undefined,
-        map: undefined
+        currentRoute: undefined
     },
     mutations: {
         setRoutes(state, routes){
             state.routes = routes
-        },
-        setMap(state, map){
-            state.map = map
         },
         selectRoute(state, route){
             if(state.currentRoute) state.currentRoute.deactivate()
@@ -28,20 +24,20 @@ export default new Vuex.Store({
         setSelected(state, obj){
             if(state.selected) state.selected.deselect()
             state.selected = obj
-            obj.select()
+            state.selected.select()
         },
-        unsetSelected(state, obj){
+        unsetSelected(state){
+            state.selected.deselect()
+            state.currentRoute.showStops()
             state.selected = undefined
-            obj.deselect()
         },
-
     },
     actions: {
         getRoutes( {commit, state} ){
             return axios.get(`${apiBaseUrl}routes`)
             .then(routeData => {
                 let routes = routeData.data.reduce((obj, route) => {
-                    obj[route.route_id] = new Route(route, state.map)
+                    obj[route.route_id] = new Route(route)
                     return obj
                 }, {})
                 commit('setRoutes', routes)
@@ -51,21 +47,22 @@ export default new Vuex.Store({
             commit('selectRoute', route)
             let busPromise = axios.get(`${apiBaseUrl}buslocations/${route.id}`)
             .then(r => {
-                route.buses = r.data.map(item => new Bus(item, route, state.map, dispatch.bind(null, 'selectBus')))
+                route.buses = r.data.map(item => new Bus(item, route, dispatch.bind(null, 'selectBus')))
             })
            
             let stopPromise = route.stops
             ? (route.stops.map(stop => stop.activate()), Promise.resolve())
             : axios.get(`${apiBaseUrl}stops_on_route/${route.id}`) 
               .then(r => {
-                  route.stops = r.data.map(stopdata =>  new Stop(stopdata, state.map, dispatch.bind(null, 'selectStop')))
+                  route.stops = r.data.map(stopdata =>  new Stop(stopdata, dispatch.bind(null, 'selectStop')))
               })
- 
+
             return Promise.all([busPromise, stopPromise])
+            .then(() => route.fitMapToRoute())
             .catch(console.log)
         },
         selectStop({commit, state}, stop){
-            if(state.selected === stop) return commit('unsetSelected', stop)
+            if(state.selected === stop) return commit('unsetSelected')
             axios.get(`${apiBaseUrl}stop_times/${stop.stopID}`)
             .then(stop_times => {
                 stop.schedule = stop_times.data.schedule
@@ -76,24 +73,19 @@ export default new Vuex.Store({
         selectBus({commit, state}, bus){
             if(state.selected === bus) {
                 state.currentRoute.showStops()
-                commit('unsetSelected', bus)
+                commit('unsetSelected')
             }
             else {
                 state.currentRoute.hideStops()
 
                 axios.get(`${apiBaseUrl}route_stops/${bus.tripID}/${bus.routeNumber}/${bus.direction}`)
                 .then(r => {
-                    bus.stops = r.data.map(stop => new Stop(stop, state.map, () => {}))
+                    bus.stops = r.data.map(stop => new Stop(stop, () => {}))
                     //this.startChase()
-
                      commit('setSelected', bus)
                 })
                 
             }
-            /*
-            
-            */
-            console.log("bus selected", bus)
         }
         
 

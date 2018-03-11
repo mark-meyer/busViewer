@@ -17,7 +17,6 @@ export default {
         pickRoute(route){
             this.$emit('clicked')
             this.$store.dispatch('showRoute', route)
-            .then(() => route.fitMapToRoute())
         }
      },
     components:{ route: Route },
