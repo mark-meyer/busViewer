@@ -1,11 +1,11 @@
 <template>
     <div id="busInfo">
-        <div id="number" v-bind:style="{borderColor: bus.color}">{{bus.routeNumber}}</div> 
+        <div id="number" v-bind:style="{borderColor: obj.color}">{{obj.routeNumber}}</div> 
         <div id="tripInfo">
-            <p><b>{{bus.destination}}</b> <br>
-                {{direction}} | {{bus.opStatus}}
+            <p><b>{{obj.destination}}</b> <br>
+                {{direction}} | {{obj.opStatus}}
                 <br>
-                Last: {{bus.laststop}}
+                Last: {{obj.laststop}}
             </p>   
         </div>
     </div>
@@ -14,11 +14,11 @@
 <script>
 export default {
     name: "Businfo",
-    props: ['bus'],
+    props: ['obj'],
     computed:{
         direction(){
             const directions = {O: "Outbound", I:"Inbound" } // Govnm't Hill Bus reports 'L' in direction. Don't know how to interpret that
-            return directions[this.bus.direction]
+            return directions[this.obj.direction]
         },
     }
 }

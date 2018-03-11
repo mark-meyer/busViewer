@@ -1,13 +1,13 @@
 <template>
   <div id="stopInfo">
-      <h3>{{this.stop.stopID}}</h3>
-      <h4 v-if="stop">{{stop.name}}</h4>
+      <h3>{{obj.stopID}}</h3>
+      <h4 v-if="obj">{{obj.name}}</h4>
   </div>
 </template>
 
 <script>
 export default {
-    props:['stop']
+    props:['obj']
 }
 </script>
 

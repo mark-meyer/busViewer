@@ -19,9 +19,9 @@
 import Route from '@/components/Route'
 import '../compiled-icons/bus'
 import '../compiled-icons/close'
+import { mapState } from 'vuex'
 
 export default {
-    props:['stop', 'routes'],
     filters: {
         to12Hour(value) {
             let [hour, min, seconds] = value.split(':')
@@ -38,7 +38,11 @@ export default {
         close() {
             this.$emit('close')
         }
-    }
+    },
+    computed: mapState({
+        routes: 'routes', 
+        stop: 'selected'
+        })
 }
 </script>
 

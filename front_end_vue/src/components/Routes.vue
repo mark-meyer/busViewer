@@ -3,26 +3,28 @@
         <h3>
             <svgicon icon="bus" width="2em" height="2em" color="#333"></svgicon> Routes
         </h3>
-        <route class="routeName" v-for='route in routes' :selected='selectedroute && route.id == selectedroute.id' :route='route' v-bind:key='route.id' @click.native='pickRoute(route)' ></route>
+        <route class="routeName" v-for='route in routes' :selected='currentRoute && route.id == currentRoute.id' :route='route' v-bind:key='route.id' @click.native='pickRoute(route)' ></route>
     </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import Route from '@/components/Route'
 import '../compiled-icons/bus'
 
 export default {
-    props:['routes', 'selectedroute'],
     methods: {
         pickRoute(route){
-            this.$emit('pickRoute', route)
-            this.menuOpen = false
+            this.$emit('clicked')
+            this.$store.dispatch('showRoute', route)
+            .then(() => route.fitMapToRoute())
         }
      },
     components:{ route: Route },
     mounted(){
         this.$emit("mounted", 'Routes')
-    }
+    },
+    computed:mapState(['routes', 'currentRoute'])
 }
 </script>
 

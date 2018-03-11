@@ -2,9 +2,8 @@
     <div id="panel"  v-bind:class="{menuOpen: menuOpen}">
         <div id="panelTab" @click='toggleopen'>{{tabText}}</div> 
         <div id='container'>               
-            <routes v-if="showRoutes" :routes='routes' :selectedroute='selectedroute'  @mounted="setTab" @pickRoute='pickRoute'></routes> 
-            <stop_schedule :stop='selectedroute.selectedStop'  :routes='routes' v-if="selectedroute && selectedroute.selectedStop" @mounted="setTab" @close="closeSchedule()"></stop_schedule>   
-            <trip_schedule :bus='selectedroute.selectedBus' v-if="selectedroute && selectedroute.selectedBus"  @mounted="setTab" @close="closeSchedule()"></trip_schedule>
+            <routes v-if="showRoutes" :routes='routes' :selectedroute='currentRoute'  @mounted="setTab" @clicked='close'></routes> 
+            <component :is="componentType" v-if="selected" @mounted="setTab" @close="closeSchedule()"></component>
         </div>
     </div>
 </template>
@@ -13,6 +12,7 @@
 import Stop_Schedule from '@/components/Stop_Schedule'
 import Routes from '@/components/Routes'
 import TripSchedule from '@/components/TripSchedule'
+import { mapState } from 'vuex'
 
 export default {
     name: "InfoPanel",
@@ -22,15 +22,13 @@ export default {
             tabText: "Routes"
         }
     },
-    props:['routes', 'selectedroute'],
     components: {
-        stop_schedule: Stop_Schedule,
-        trip_schedule: TripSchedule,
+        stop: Stop_Schedule,
+        bus: TripSchedule,
         routes: Routes
     },
     methods: {
-        pickRoute(route){
-            this.$emit('pickRoute', route)
+        close(){
             this.menuOpen = false
         },
         toggleopen(){
@@ -45,13 +43,14 @@ export default {
         }
     },
     computed: {
-        selectedStop(){
-            return (this.selectedroute && this.selectedroute.selectedStop) ? this.selectedroute.selectedStop : undefined
+        componentType(){
+            return this.selected ? this.selected.type : "routes"
         },
         showRoutes(){
-            if (!this.selectedroute) return true
-            return !(this.selectedroute.selectedStop || this.selectedroute.selectedBus )
-        }      
+            if (!this.currentRoute) return true
+            return !(this.selected )
+        },
+        ...mapState(['currentRoute', 'routes', 'selected'])
     }
 }
 </script>

@@ -17,9 +17,9 @@
 import Route from '@/components/Route'
 import '../compiled-icons/bus'
 import '../compiled-icons/close'
+import { mapState } from 'vuex'
 
 export default {
-    props:['bus'],
     methods:{
         close(){this.$emit('close')}
     },
@@ -37,7 +37,10 @@ export default {
             hour = hour % 12 == 0 ? 12 : hour % 12 
             return `${hour}:${min}`
         }
-    }
+    },
+    computed: mapState({
+        bus: 'selected'
+        })
 }
 </script>
 

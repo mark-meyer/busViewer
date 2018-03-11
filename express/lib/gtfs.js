@@ -131,7 +131,7 @@ class Stop_Times extends GTFS_File{
     scheduleAtStop(stop_id){
         // returns an object {route_id: [stop_times]}
         let now =  moment().tz('America/Anchorage')
-        let today_id = now.day() <= 5 ? 1 : day - 4
+        let today_id = now.day() <= 5 ? 1 : now.day() - 4
 
         return this.data.filter(stop => (stop.stop_id == stop_id ))
         .reduce((a, c) => {
@@ -217,7 +217,7 @@ class GTFS {
     stopInfo(stop_id){
         // Returns stop name and time table according to GTFS
         let now =  moment().tz('America/Anchorage')
-        let day_id = now.day() <= 5 ? 1 : day - 4
+        let day_id = now.day() <= 5 ? 1 : now.day() - 4
 
         let stop_schedule = this.stop_times.scheduleAtStop(stop_id)
         // filter out already passed times and add destination from trips

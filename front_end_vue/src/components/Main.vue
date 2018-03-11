@@ -1,19 +1,17 @@
 <template>
     <div>
         
-        <div id="header">
-            <div v-if="noSelection" id="circle_a" >A</div> <h1 v-if="noSelection"> Anchorage Buses</h1>
+        <div >
+            <div id="header" v-if="!selected"><div id="circle_a" >A</div> <h1> Anchorage Buses</h1></div>
+            <component :is='componentType' :obj='selected' v-if="selected"></component>
+            <!--
             <businfo :bus='selectedBus' v-if="selectedBus" ></businfo>
             <stopinfo id="stopInfo" v-if="selectedStop" :stop="selectedStop"></stopinfo> 
+            -->
         </div>
        
         <div id="root">
-           <infopanel 
-                :selectedroute='selectedRoute' 
-                :routes='routes' 
-                v-on:pickRoute='highlightRoute' 
-                v-on:closeInfo='deselect'
-            ></infopanel>
+           <infopanel></infopanel>
             
             <div id="holder">
                 <div ref="mainMap" id="mainMap"></div>
@@ -23,6 +21,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import {Route} from '@/Route.js'
 import Businfo from '@/components/Businfo'
 import Stopinfo from '@/components/Stopinfo'
@@ -37,35 +37,11 @@ export default {
             map: undefined,
         }
     },
-    methods:{
-        highlightRoute(route) {
-            if (this.selectedRoute){
-                this.selectedRoute.deselect()
-            } 
-            this.selectedRoute = route
-            this.selectedRoute.select()
-        },
-        deselect(){
-            if(this.selectedRoute){
-                if (this.selectedRoute.selectedStop){
-                    this.selectedRoute.deselectStop()
-                } else {
-                    this.selectedRoute.showStops()
-                    this.selectedRoute.deselectBus()
-                }          
-            }
-        }
-    },
     computed: {
-        selectedBus: function(){
-            return this.selectedRoute && this.selectedRoute.selectedBus
+        componentType(){
+            return this.selected ? this.selected.type+'info' : "routes"
         },
-        selectedStop: function(){
-           return this.selectedRoute && this.selectedRoute.selectedStop 
-        },
-        noSelection: function(){
-            return !(this.selectedBus || this.selectedStop)
-        }
+        ...mapState(['selected'])
     },
     components: {
         businfo: Businfo,
@@ -73,19 +49,18 @@ export default {
         infopanel: InfoPanel
     },
     mounted: function(){
-        this.map = new google.maps.Map(this.$refs["mainMap"], {
+        let gMap = new google.maps.Map(this.$refs["mainMap"], {
                 zoom: 12,
                 center: {lat: 61.18, lng: -149.860},
                 mapTypeControl: false,
                 fullscreenControl: false
         })
         const styledMapType = new google.maps.StyledMapType(require("../mapstyles.js"))
-        this.map.mapTypes.set('styled_map', styledMapType);
-        this.map.setMapTypeId('styled_map');
+        gMap.mapTypes.set('styled_map', styledMapType);
+        gMap.setMapTypeId('styled_map');
 
-        Route.getRoutes(this.map)
-        .then(routes => this.routes = routes)
-        .catch(err => console.log(err))
+        this.$store.commit('setMap', gMap)
+        this.$store.dispatch('getRoutes')
     }
 }
 </script>
