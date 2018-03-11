@@ -1,25 +1,28 @@
 <template>
     <div id="busInfo">
-        <div id="number" v-bind:style="{borderColor: obj.color}">{{obj.routeNumber}}</div> 
+        <div id="number" v-bind:style="{borderColor: bus.color}">{{bus.routeNumber}}</div> 
         <div id="tripInfo">
-            <p><b>{{obj.destination}}</b> <br>
-                {{direction}} | {{obj.opStatus}}
+            <p><b>{{bus.destination}}</b> <br>
+                {{direction}} | {{bus.opStatus}}
                 <br>
-                Last: {{obj.laststop}}
+                Last: {{bus.laststop}}
             </p>   
         </div>
     </div>
 </template>
 
 <script>
+import {mapState} from 'vuex'
 export default {
     name: "Businfo",
-    props: ['obj'],
     computed:{
         direction(){
             const directions = {O: "Outbound", I:"Inbound" } // Govnm't Hill Bus reports 'L' in direction. Don't know how to interpret that
-            return directions[this.obj.direction]
+            return directions[this.bus.direction]
         },
+        ...mapState({
+            bus: 'selected'
+        })
     }
 }
 </script>

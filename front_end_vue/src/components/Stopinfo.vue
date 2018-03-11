@@ -1,13 +1,17 @@
 <template>
   <div id="stopInfo">
-      <h3>{{obj.stopID}}</h3>
-      <h4 v-if="obj">{{obj.name}}</h4>
+      <h3>{{stop.stopID}}</h3>
+      <h4 v-if="stop">{{stop.name}}</h4>
   </div>
 </template>
 
 <script>
+import {mapState} from 'vuex'
+
 export default {
-    props:['obj']
+     computed:mapState({
+            stop: 'selected'
+     })
 }
 </script>
 

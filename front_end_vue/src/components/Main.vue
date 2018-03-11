@@ -1,18 +1,12 @@
 <template>
-    <div>
-        
+    <div>      
         <div >
             <div id="header" v-if="!selected"><div id="circle_a" >A</div> <h1> Anchorage Buses</h1></div>
-            <component :is='componentType' :obj='selected' v-if="selected"></component>
-            <!--
-            <businfo :bus='selectedBus' v-if="selectedBus" ></businfo>
-            <stopinfo id="stopInfo" v-if="selectedStop" :stop="selectedStop"></stopinfo> 
-            -->
+            <component :is='componentType'  v-if="selected"></component>
         </div>
        
         <div id="root">
-           <infopanel></infopanel>
-            
+           <infopanel></infopanel>        
             <div id="holder">
                 <div ref="mainMap" id="mainMap"></div>
             </div>

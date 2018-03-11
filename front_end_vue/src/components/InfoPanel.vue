@@ -2,7 +2,7 @@
     <div id="panel"  v-bind:class="{menuOpen: menuOpen}">
         <div id="panelTab" @click='toggleopen'>{{tabText}}</div> 
         <div id='container'>               
-            <routes v-if="showRoutes" :routes='routes' :selectedroute='currentRoute'  @mounted="setTab" @clicked='close'></routes> 
+            <routes v-if="!selected" @mounted="setTab" @clicked='close'></routes> 
             <component :is="componentType" v-if="selected" @mounted="setTab" @close="closeSchedule()"></component>
         </div>
     </div>
@@ -45,10 +45,6 @@ export default {
     computed: {
         componentType(){
             return this.selected ? this.selected.type : "routes"
-        },
-        showRoutes(){
-            if (!this.currentRoute) return true
-            return !(this.selected )
         },
         ...mapState(['currentRoute', 'routes', 'selected'])
     }
