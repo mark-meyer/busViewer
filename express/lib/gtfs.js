@@ -3,6 +3,7 @@ const fs            = require('fs')
 const moment        = require('moment-timezone');
 const raw_directory = (__dirname + '/../gtfs/')
 
+const DAYS_MAP = [3, 1, 1, 1, 1, 1, 2]
 /**
  * Handles reading and basic csv parsing
  * Subclasses should override processFile()
@@ -101,10 +102,9 @@ class Routes extends GTFS_File{
 
 class Stop_Times extends GTFS_File{
     stopsFromTrip(trip, route_id, direction){
-        let days = [3, 1, 1, 1, 1, 1, 2]
         // all the stops along a particular trip
         let now =  moment().tz('America/Anchorage')
-        let day_id = days[now.day()]
+        let day_id = DAYS_MAP[now.day()]
         const trip_id = [route_id, trip, direction, day_id].join('-')
         return this.data.filter(stop => stop.trip_id == trip_id)
     }
@@ -117,7 +117,7 @@ class Stop_Times extends GTFS_File{
                To unambigously find stops we need short trip_id and direction.
         */
         let now =  moment().tz('America/Anchorage')
-        let day_id = now.day() <= 5 ? 1 : day - 4
+        let day_id = DAYS_MAP[now.day()]
         const trip_id = [route_id, trip, direction, day_id].join('-')
         return this.data.filter(stop => {
             return (stop.trip_id == trip_id 
@@ -131,7 +131,7 @@ class Stop_Times extends GTFS_File{
     scheduleAtStop(stop_id){
         // returns an object {route_id: [stop_times]}
         let now =  moment().tz('America/Anchorage')
-        let today_id = now.day() <= 5 ? 1 : now.day() - 4
+        let today_id =  DAYS_MAP[now.day()]
 
         return this.data.filter(stop => (stop.stop_id == stop_id ))
         .reduce((a, c) => {

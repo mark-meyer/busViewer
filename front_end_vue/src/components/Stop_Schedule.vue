@@ -4,7 +4,9 @@
             <svgicon icon="bus" width="2em" height="2em" color="#333"></svgicon> Upcoming Trips
             <span  @click='close()'> <svgicon icon="close" width="1.3em" height="1.3em" id="close"></svgicon> </span>
         </h3>
-
+        <div class=routeBlock v-if="Object.keys(stop.schedule).length === 0">
+            There are no upcoming trips scheduled at this stop today.
+        </div>
         <div class="routeBlock" v-for='(trips, route) in stop.schedule' v-bind:key="route">
             <route :route='routes[route]'></route>      
             <div class="schedule" v-for="trip in trips" v-bind:key="trip.trip_id">

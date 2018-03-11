@@ -3,7 +3,7 @@
         <h3>
             <svgicon icon="bus" width="2em" height="2em" color="#333"></svgicon> Routes
         </h3>
-        <route class="routeName" v-for='route in routes' :selected='currentRoute && route.id == currentRoute.id' :route='route' v-bind:key='route.id' @click.native='pickRoute(route)' ></route>
+        <route class="routeName" v-for='route in routes' :selected='currentRoute && route.id == currentRoute.id' :route='route' v-bind:key='route.id'></route>
     </div>
 </template>
 
@@ -13,12 +13,6 @@ import Route from '@/components/Route'
 import '../compiled-icons/bus'
 
 export default {
-    methods: {
-        pickRoute(route){
-            this.$emit('clicked')
-            this.$store.dispatch('showRoute', route)
-        }
-     },
     components:{ route: Route },
     mounted(){
         this.$emit("mounted", 'Routes')

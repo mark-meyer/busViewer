@@ -1,5 +1,5 @@
 <template>
-    <div class="routeName" v-bind:class='{selected:selected}'> 
+    <div class="routeName" v-bind:class='{selected:selected}' @click="goToRoute()"> 
         <span class="routeNumber" v-bind:style="{backgroundColor: route.color, borderColor: route.color}">{{route.id}}</span>
         <span class="routeName">{{route.name}}</span>
     </div>
@@ -10,6 +10,16 @@ import { mapState } from 'vuex'
 
 export default {
     props: ['route', 'selected'],
+    methods:{
+        goToRoute(){
+            console.log("route picked: ", this.route)
+            // it would be a nice feature to keep the stop selected to compare routes
+            // that share a stop, This might require keeping a single 'stops' object that routes reference
+            // rather than having routes 'own' a stops array.
+            this.$store.commit('unsetSelected')
+            this.$store.dispatch('showRoute', this.route)      
+        }
+    }
 }
 </script>
 

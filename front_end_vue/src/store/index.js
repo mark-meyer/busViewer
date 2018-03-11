@@ -27,8 +27,8 @@ export default new Vuex.Store({
             state.selected.select()
         },
         unsetSelected(state){
-            state.selected.deselect()
-            state.currentRoute.showStops()
+            if (state.selected) state.selected.deselect()
+            if (state.currentRoute) state.currentRoute.showStops()
             state.selected = undefined
         },
     },
@@ -68,8 +68,7 @@ export default new Vuex.Store({
                 stop.schedule = stop_times.data.schedule
                 commit('setSelected', stop)
             })
-        },
-        
+        },      
         selectBus({commit, state}, bus){
             if(state.selected === bus) {
                 state.currentRoute.showStops()
@@ -77,14 +76,12 @@ export default new Vuex.Store({
             }
             else {
                 state.currentRoute.hideStops()
-
                 axios.get(`${apiBaseUrl}route_stops/${bus.tripID}/${bus.routeNumber}/${bus.direction}`)
                 .then(r => {
                     bus.stops = r.data.map(stop => new Stop(stop, () => {}))
                     //this.startChase()
                      commit('setSelected', bus)
-                })
-                
+                })  
             }
         }
         
