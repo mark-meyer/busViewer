@@ -1,6 +1,6 @@
 <template>
     <div id="panel"  v-bind:class="{menuOpen: menuOpen}">
-        <div id="panelTab" @click='toggleopen'>{{tabText}}</div> 
+        <div id="panelTab" @click='toggleopen'>{{menuOpen ? "Close": tabText}}</div> 
         <div id='container'>               
             <routes v-if="!selected" @mounted="setTab" @clicked='close'></routes> 
             <component :is="componentType" v-if="selected" @mounted="setTab" @close="closeSchedule()"></component>
