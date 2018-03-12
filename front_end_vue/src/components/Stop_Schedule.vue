@@ -8,7 +8,7 @@
             There are no upcoming trips scheduled at this stop today.
         </div>
         <div class="routeBlock" v-for='(trips, route) in stop.schedule' v-bind:key="route">
-            <route :route='routes[route]' @click.native='pickRoute(route)'></route>  
+            <route :route='routes[route]' @click.native='pickRoute(route)' :selected="route == currentRoute.id"></route>  
             <div  class="schedule" v-if="trips.length == 0">There are no upcoming trips scheduled at this stop today.</div>    
             <div class="schedule" v-for="trip in trips" v-bind:key="trip.trip_id+trip.departure_time">
                 {{trip.departure_time | to12Hour}} | {{trip.destination}}
@@ -54,7 +54,8 @@ export default {
     },
     computed: mapState({
         routes: 'routes', 
-        stop: 'selected'
+        stop: 'selected',
+        currentRoute: 'currentRoute'
         })
 }
 </script>
@@ -93,5 +94,8 @@ export default {
     #close:hover {
         fill: #aaa;
         cursor: pointer;
+    }
+    .selected {
+        font-weight: bold;
     }
 </style>

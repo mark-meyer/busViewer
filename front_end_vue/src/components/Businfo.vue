@@ -58,7 +58,6 @@ export default {
     }
     #busInfo {
         position: absolute;
-        padding-top:.25em;
         text-align: left;
         background-color: white;
         display: flex;  
