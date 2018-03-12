@@ -1,7 +1,7 @@
 <template>
     <div>      
         <div id="header">
-            <div v-if="!selected"><div id="circle_a" >A</div> <h1> Anchorage Buses</h1></div>
+            <div id="defaultHeader" v-if="!selected"><div id="circle_a" v-bind:style="{borderColor: headerColor}">{{headerLogo}}</div> <h1> {{headerText}}</h1></div>
             <component :is='componentType'  v-if="selected"></component>
         </div>
        
@@ -24,18 +24,21 @@ import InfoPanel from '@/components/InfoPanel'
 
 export default {
     name: 'Main',
-    data: function(){
-        return {
-            routes: [],
-            selectedRoute:undefined,
-            map: undefined,
-        }
-    },
+   
     computed: {
         componentType(){
             return this.selected ? this.selected.type+'info' : "routes"
         },
-        ...mapState(['selected'])
+        headerText(){
+            return this.currentRoute ? this.currentRoute.name : "Anchorage Buses"
+        },
+        headerLogo(){
+            return this.currentRoute ? this.currentRoute.id : "A"
+        },
+        headerColor(){
+            return this.currentRoute ? this.currentRoute.color : "#f1f118"
+        },
+        ...mapState(['selected', 'currentRoute'])
     },
     components: {
         businfo: Businfo,
@@ -79,10 +82,13 @@ export default {
        /* min-width: 300px; */  
        
     } 
+    #defaultHeader {
+        display: flex;
+    }
     #header {
         position: relative;
         margin-top: .75em;
-        display: flex;
+        
         height: 4em;
     }
     h1 {
@@ -90,11 +96,12 @@ export default {
     }
     #circle_a {
         font-size:2em;
-        border: 12px solid #f1f118;
+        border-style: solid;
+        border-width: 12px;
+        
         border-radius: 50%;
         width: 1.5em;
         height: 1.5em;
-        line-height: 130%;
         text-align: center; 
         margin: 0px 20px 20px 20px;
         font-weight: bold;
@@ -113,14 +120,13 @@ export default {
         color: #42b983;
     }
     @media only screen  and (max-width : 680px) {
-        #header {
+        #defaultHeader {
             align-items: baseline;
             margin-top: .5em;
         }
         #circle_a {
             font-size: 1.25em;
-            border: 8px solid #f1f118;
-            line-height: 130%;
+            border-width: 8px;
             margin-left: .5em;
         }
         h1 {

@@ -125,22 +125,26 @@ class Stop_Times extends GTFS_File{
         })
     }
     stops(stop_id){
-        // each stop can be associated with multiple trips
+        /* Each stop can be associated with multiple trips */
         this.data.filter(stop => stop.stop_id = stop_id)
     }
     scheduleAtStop(stop_id){
-        // returns an object {route_id: [stop_times]}
+        /* Returns an object {route_id: [stop_times]} */
         let now =  moment().tz('America/Anchorage')
         let today_id =  DAYS_MAP[now.day()]
 
         return this.data.filter(stop => (stop.stop_id == stop_id ))
         .reduce((a, c) => {
             let [route_id, trip_id, direction, day_id] = c.trip_id.split('-')
-            if (today_id != day_id) return a //only today's times
             if( a[route_id] ) {
-                a[route_id].push({trip_id: c.trip_id, departure_time: c.departure_time})
+                if (today_id == day_id){
+                    a[route_id].push({trip_id: c.trip_id, departure_time: c.departure_time})
+                }
             } else {
-                a[route_id] = [{trip_id: c.trip_id, departure_time: c.departure_time}]
+                /* On days when a route doesn't service a stop, we still want to show the route.
+                   So set it as empty if this trip doesn't run today.
+                */
+                a[route_id] = today_id == day_id ? [{trip_id: c.trip_id, departure_time: c.departure_time}] : []
             }
             return a
         }, {})
@@ -217,7 +221,7 @@ class GTFS {
     stopInfo(stop_id){
         // Returns stop name and time table according to GTFS
         let now =  moment().tz('America/Anchorage')
-        let day_id = now.day() <= 5 ? 1 : now.day() - 4
+        let today_id =  DAYS_MAP[now.day()]
 
         let stop_schedule = this.stop_times.scheduleAtStop(stop_id)
         // filter out already passed times and add destination from trips
