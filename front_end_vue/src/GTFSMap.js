@@ -86,6 +86,7 @@ class Stop{
         this.marker.setMap(null)
     }
     select(){
+        this.marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 100)
         this.marker.setIcon({
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 6,
@@ -97,6 +98,7 @@ class Stop{
         )
     }
     deselect(){
+        this.marker.setZIndex(google.maps.Marker.MAX_ZINDEX)
         this.marker.setIcon({
             path: google.maps.SymbolPath.CIRCLE,
             scale: 3,

@@ -106,7 +106,7 @@ class Stop_Times extends GTFS_File{
         let now =  moment().tz('America/Anchorage')
         let day_id = DAYS_MAP[now.day()]
         const trip_id = [route_id, trip, direction, day_id].join('-')
-        return this.data.filter(stop => stop.trip_id == trip_id)
+        return this.data.filter(stop => stop.trip_id == trip_id).sort((a, b) => a.stop_sequence - b.stop_sequence)
     }
     futureStopsFromTrip(trip, route_id, direction){
         // all the stops along a particular trip that are scheduled after now
