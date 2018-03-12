@@ -107,6 +107,9 @@ class Stop{
             }
         )
     }
+    center(){
+        MAP.panTo(this.marker.getPosition())
+    }
 }
 class Bus{
     constructor(data, route, click){

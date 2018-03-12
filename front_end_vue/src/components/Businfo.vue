@@ -5,7 +5,8 @@
             <p><b>{{bus.destination}}</b> <br>
                 {{direction}} | {{bus.opStatus}}
                 <br>
-                Last: {{bus.laststop}}
+                <span v-if='tripStop'>{{tripStop.name | removeCaps}} | Scheduled: {{tripStop.departure_time | to12Hour}} </span>
+                <span v-else>Last: {{bus.laststop}}</span>
             </p>   
         </div>
     </div>
@@ -21,8 +22,23 @@ export default {
             return directions[this.bus.direction]
         },
         ...mapState({
-            bus: 'selected'
+            bus: 'selected',
+            tripStop: 'tripStop'
         })
+    },
+    filters: {
+        removeCaps(str) {
+            let directions = ['ESE', 'ENE', 'NNW', 'SSW', 'SSE', 'WNW', 'NNE', 'WSW']
+            return str.replace(/\w\S*/g, function(txt){
+                if (directions.includes(txt)) return ''
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            })  
+        },
+        to12Hour(value) {
+            let [hour, min, seconds] = value.split(':')
+            hour = hour % 12 == 0 ? 12 : hour % 12 
+            return `${hour}:${min}`
+        }
     }
 }
 </script>
@@ -42,6 +58,7 @@ export default {
     }
     #busInfo {
         position: absolute;
+        padding-top:.25em;
         text-align: left;
         background-color: white;
         display: flex;  
@@ -67,7 +84,7 @@ export default {
         }
         #busInfo{
             position: absolute;
-            top:.25em;
+            padding-top:.5em;
             text-align: left;
             padding:.25em;
 

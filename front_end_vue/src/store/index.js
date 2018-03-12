@@ -10,7 +10,8 @@ export default new Vuex.Store({
     state:{
         routes: [],
         selected: undefined,
-        currentRoute: undefined
+        currentRoute: undefined,
+        tripStop: undefined
     },
     mutations: {
         setRoutes(state, routes){
@@ -22,15 +23,35 @@ export default new Vuex.Store({
             state.currentRoute = route
         },
         setSelected(state, obj){
+            if(state.tripStop) state.tripStop.deselect()
+            state.tripStop = undefined
+
             if(state.selected) state.selected.deselect()
             obj.select()
             state.selected = obj
         },
         unsetSelected(state){
+            if(state.tripStop) state.tripStop.deselect()
+            state.tripStop = undefined
             if (state.selected) state.selected.deselect()
             if (state.currentRoute) state.currentRoute.showStops()
             state.selected = undefined
         },
+        setTripStop(state, stop){
+            if (state.tripStop) state.tripStop.deselect()
+            if (state.tripStop == stop) {
+                state.tripStop.deselect()
+                state.tripStop = undefined
+            } else{
+                stop.select()
+                state.tripStop = stop    
+            }
+        },
+        unsetTripStop(state){
+            if(!state.tripStop) return
+            state.tripStop.deselect()
+            state.tripStop = undefined
+        }
     },
     actions: {
         getRoutes( {commit, state} ){
@@ -69,7 +90,7 @@ export default new Vuex.Store({
                 commit('setSelected', stop)
             })
         },      
-        selectBus({commit, state}, bus){
+        selectBus({commit, state, dispatch}, bus){
             if(state.selected === bus) {
                 state.currentRoute.showStops()
                 commit('unsetSelected')
@@ -78,8 +99,11 @@ export default new Vuex.Store({
                 state.currentRoute.hideStops()
                 axios.get(`${apiBaseUrl}route_stops/${bus.tripID}/${bus.routeNumber}/${bus.direction}`)
                 .then(r => {
-                    bus.stops = r.data.map(stop => new Stop(stop, () => {}))
-                    //this.startChase()
+                    bus.stops = r.data.map(stop => {
+                        return new Stop(stop, function(stop){   
+                            commit('setTripStop', stop)   
+                        })
+                    })
                      commit('setSelected', bus)
                 })  
             }

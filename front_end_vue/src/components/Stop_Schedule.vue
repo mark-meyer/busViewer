@@ -38,7 +38,7 @@ export default {
     },
     methods: {
         close() {
-            this.$emit('close')
+            this.$emit('exit')
         },
         pickRoute(route){
             // keep the schedule and stop in place while changing routes.

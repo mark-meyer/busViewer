@@ -2,10 +2,10 @@
     <div id="stopInfo">
         <h3>
             <svgicon icon="bus" width="2em" height="2em" color="#333"></svgicon> Scheduled Stops
-            <span  @click='close()'> <svgicon icon="close" width="1.3em" height="1.3em" id="close"></svgicon> </span>
+            <span  @click='exit()'> <svgicon icon="close" width="1.3em" height="1.3em" id="close"></svgicon> </span>
         </h3>
-        <table>
-            <tr v-for="stop in bus.stops" v-bind:key="stop.id">
+        <table ref="schedule">
+            <tr v-for="stop in bus.stops" v-bind:key="stop.id" v-bind:class='{selected: stop === selected}' @click="setTripStop(stop)">
                 <td> {{stop.departure_time | to12Hour}} </td>
                 <td> {{stop.name | removeCaps}} </td>
             </tr>
@@ -21,7 +21,13 @@ import { mapState } from 'vuex'
 
 export default {
     methods:{
-        close(){this.$emit('close')}
+        close(){ this.$emit('close')},
+        exit() { this.$emit('exit') },
+        setTripStop(stop){
+            this.$store.commit('setTripStop', stop)
+            this.$emit("close")
+            stop.center()
+        }
     },
     mounted(){ this.$emit("mounted", 'Schedule')},
     filters: {
@@ -39,8 +45,9 @@ export default {
         }
     },
     computed: mapState({
-        bus: 'selected'
-        })
+        bus: 'selected',
+        selected: 'tripStop'
+    })  
 }
 </script>
 
@@ -63,9 +70,19 @@ export default {
     tr:nth-child(even) {
         background-color: rgb(241, 241, 241);
     }
+    tr.selected{
+        background-color:dimgrey;
+        color: white;
+        font-weight: bold;
+    }
+    tr:hover{
+        background-color: gainsboro;
+        cursor: pointer;
+    }
     td {
         padding: .25em;
     }
+    
     .svg-icon {
         display: inline-block;
         width: 16px;

@@ -3,7 +3,7 @@
         <div id="panelTab" @click='toggleopen'>{{menuOpen ? "Close": tabText}}</div> 
         <div id='container'>               
             <routes v-if="!selected" @mounted="setTab" @clicked='close'></routes> 
-            <component :is="componentType" v-if="selected" @mounted="setTab" @close="closeSchedule()"></component>
+            <component :is="componentType" v-if="selected" @mounted="setTab" @exit="closeSchedule()" @close="close()"></component>
         </div>
     </div>
 </template>

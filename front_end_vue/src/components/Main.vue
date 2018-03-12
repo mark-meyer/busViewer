@@ -1,7 +1,7 @@
 <template>
     <div>      
-        <div >
-            <div id="header" v-if="!selected"><div id="circle_a" >A</div> <h1> Anchorage Buses</h1></div>
+        <div id="header">
+            <div v-if="!selected"><div id="circle_a" >A</div> <h1> Anchorage Buses</h1></div>
             <component :is='componentType'  v-if="selected"></component>
         </div>
        
