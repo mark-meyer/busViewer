@@ -23,8 +23,8 @@ export default new Vuex.Store({
         },
         setSelected(state, obj){
             if(state.selected) state.selected.deselect()
+            obj.select()
             state.selected = obj
-            state.selected.select()
         },
         unsetSelected(state){
             if (state.selected) state.selected.deselect()
@@ -63,7 +63,7 @@ export default new Vuex.Store({
         },
         selectStop({commit, state}, stop){
             if(state.selected === stop) return commit('unsetSelected')
-            axios.get(`${apiBaseUrl}stop_times/${stop.stopID}`)
+            axios.get(`${apiBaseUrl}stop_times/${stop.id}`)
             .then(stop_times => {
                 stop.schedule = stop_times.data.schedule
                 commit('setSelected', stop)

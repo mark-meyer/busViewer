@@ -50,11 +50,15 @@ class Route {
         this.stops.forEach(stop => bounds.extend(stop.marker.getPosition()) )
         MAP.fitBounds(bounds)
     }
+    stop(id){
+        if (!this.stops) return
+        return this.stops.find(stop => stop.id == id)
+    }
 }
 class Stop{
     constructor(data, click) {
         this.type           = "stop"
-        this.stopID         = data.stop_id
+        this.id         = data.stop_id
         this.coordinates    = {lat: +data.stop_lat, lng: +data.stop_lon}
         this.name           = data.stop_name
         this.url            = data.stop_url

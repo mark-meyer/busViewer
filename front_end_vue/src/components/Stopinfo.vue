@@ -1,6 +1,6 @@
 <template>
   <div id="stopInfo">
-      <h3>{{stop.stopID}}</h3>
+      <h3>{{stop.id}}</h3>
       <h4 v-if="stop">{{stop.name}}</h4>
   </div>
 </template>

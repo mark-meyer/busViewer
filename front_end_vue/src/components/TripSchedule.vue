@@ -5,7 +5,7 @@
             <span  @click='close()'> <svgicon icon="close" width="1.3em" height="1.3em" id="close"></svgicon> </span>
         </h3>
         <table>
-            <tr v-for="stop in bus.stops" v-bind:key="stop.stopID">
+            <tr v-for="stop in bus.stops" v-bind:key="stop.id">
                 <td> {{stop.departure_time | to12Hour}} </td>
                 <td> {{stop.name | removeCaps}} </td>
             </tr>

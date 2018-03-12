@@ -67,9 +67,10 @@ export default {
         }
         #busInfo{
             position: absolute;
-            top:0;
+            top:.25em;
             text-align: left;
             padding:.25em;
+
         }
         p {margin-top: 0}
         #tripInfo {font-size: .75em;}

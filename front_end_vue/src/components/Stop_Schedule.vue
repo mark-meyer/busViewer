@@ -8,7 +8,7 @@
             There are no upcoming trips scheduled at this stop today.
         </div>
         <div class="routeBlock" v-for='(trips, route) in stop.schedule' v-bind:key="route">
-            <route :route='routes[route]'></route>      
+            <route :route='routes[route]' @click.native='pickRoute(route)'></route>      
             <div class="schedule" v-for="trip in trips" v-bind:key="trip.trip_id">
                 {{trip.departure_time | to12Hour}} | {{trip.destination}}
             </div>
@@ -39,6 +39,16 @@ export default {
     methods: {
         close() {
             this.$emit('close')
+        },
+        pickRoute(route){
+            // keep the schedule and stop in place while changing routes.
+            let next_route = this.$store.state.routes[route]
+            this.$store.dispatch('showRoute', next_route)
+            .then(() => {
+                let stop = this.$store.state.routes[route].stop(this.stop.id)
+                this.$store.dispatch('selectStop', stop)
+                this.close()
+            })
         }
     },
     computed: mapState({
