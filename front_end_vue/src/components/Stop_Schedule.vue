@@ -9,7 +9,7 @@
         </div>
         <div class="routeBlock" v-for='(trips, route) in stop.schedule' v-bind:key="route">
             <route :route='routes[route]' @click.native='pickRoute(route)'></route>      
-            <div class="schedule" v-for="trip in trips" v-bind:key="trip.trip_id">
+            <div class="schedule" v-for="trip in trips" v-bind:key="trip.trip_id+trip.departure_time">
                 {{trip.departure_time | to12Hour}} | {{trip.destination}}
             </div>
         </div>
