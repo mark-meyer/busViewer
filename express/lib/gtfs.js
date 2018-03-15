@@ -226,7 +226,9 @@ class GTFS {
         let stop_schedule = this.stop_times.scheduleAtStop(stop_id)
         // filter out already passed times and add destination from trips
         Object.entries(stop_schedule).forEach(([k, v]) => {
-            stop_schedule[k] = v.filter(stop_time => stop_time.departure_time >= now.format('HH:mm:ss')).slice(0,4)
+            stop_schedule[k] = v.filter(stop_time => stop_time.departure_time >= now.format('HH:mm:ss'))      
+            .sort((a, b) => moment(a.departure_time, "HH:mm:ss") - moment(b.departure_time, "HH:mm:ss"))
+            .slice(0,5)
             .map(item => ({...item, ...{destination:this.trips[item.trip_id].trip_headsign}}))
         })            
         return {
