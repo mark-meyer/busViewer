@@ -67,6 +67,7 @@ export default {
     #stopInfo{
         overflow-y: scroll;
         height: 100%;
+        padding-right: .5em;
     }
     .routeBlock{
         margin-bottom: 1em;
@@ -74,7 +75,10 @@ export default {
     .schedule{
         margin-left: 3em;
         font-weight: normal;
-        font-size: .85em;       
+        font-size: .85em;  
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     .svg-icon {
         display: inline-block;
