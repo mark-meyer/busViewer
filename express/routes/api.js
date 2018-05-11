@@ -3,10 +3,31 @@ var router = express.Router();
 
 var gtfs = require('../lib/gtfs.js')
 var busXML = require('../lib/xmlBusData.js')
+const raw_directory = (__dirname + '/../gtfs/')
+var Transit_Graph = require('../lib/transit_graph.js')
+const shortestPath = require('../lib/shortest_path.js')
+let graph
+Transit_Graph.initializeFromGTFS(raw_directory)
+.then(g => graph = g)
+//console.log("graph", graph)
+
 /* GET api listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
+
+router.get('/shortest_path/:from_stop/:to_stop', function (req, res, next){
+    let from = req.params.from_stop
+    let to = req.params.to_stop
+    let parents = shortestPath(from, graph)
+    let p = parents[to]
+    let directions = [] 
+    while(p){
+        directions = p.edge.actions().concat(directions)
+        p = parents[p.parent.id]
+    } 
+    res.json(directions)
+})
 
 router.get('/shape/:shape_id', function(req, res, next) {
   const shape_id = req.params.shape_id
