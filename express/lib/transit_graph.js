@@ -2,7 +2,7 @@ const parse = require('csv-parse')
 const fs    = require('fs')
 const turf  = require('@turf/turf')
 
-const {MAX_WALKING, WALKING_SPEED} = require('./graph_config')
+const {MAX_WALKING, WALKING_SPEED, TRANSFER_COST} = require('./graph_config')
 
 module.exports = {
     initializeFromGTFS: initializeFromGTFS
@@ -55,7 +55,7 @@ class Node{
          This allows penalizing transfers to prevent route hopping when different routes share stop/times 
          Each route has it's own Node for a given station; kind of like aiport gates 
     */
-    constructor(stop_id, route){
+    constructor(stop_id, route, latlon){
         /* Unique ids are needed so we can hash based on it.
            The transfer nodes just use the stop id but these outbound nodes
            will include the route in the id also
@@ -64,6 +64,7 @@ class Node{
         this.stop_id = stop_id;
         this.outgoing = {}                 // edges to other nodes
         this.route = route
+        this.latlon = latlon
     }
     addOutgoing(next, depart_time, arrival_time, trip){
         let route_id = trip.route_id
@@ -115,9 +116,9 @@ class Transfer extends Node{
         let route_id = trip.route_id
         let outbound = this.outbound_nodes[route_id]
         if (outbound === undefined){
-            outbound = new Node(this.stop_id, route_id);
+            outbound = new Node(this.stop_id, route_id, this.latlon);
             this.outbound_nodes[route_id] = outbound
-            this.addOutgoing(new OutboundConnection(outbound, this, route_id))
+            this.addOutgoing(new OutboundConnection(outbound, this, route_id, this.latlon))
         }
         return outbound
     }
@@ -152,19 +153,18 @@ class Edge{
     }
     costFromTime(t) {
         /* this ensures that costs are relative to current time on graph */
-        return this.end_time - t
+        return this.end_time - this.start_time
     }
     actions(){
-        let action = [{
+        return {
             type: "ride",
-            from: {stop_id: this.from.stop_id, name: this.from.name},
-            departs: this.start_time,
-            to: {stop_id: this.to.stop_id, name: this.to.name},
-            arrives: this.end_time,
-            route: this.route_id
-        }]
-        if(this.to.isTransfer) action.push({type: 'exit', stop:{stop_id:this.to.stop_id, stop_name: this.to.name}})
-        return action
+            from: {stop_id: this.from.stop_id, name: this.from.name, latlon:this.from.latlon},
+            departs: seconds_to_time(this.start_time),
+            to: {stop_id: this.to.stop_id, name: this.to.name, latlon:this.to.latlon},
+            arrives: seconds_to_time(this.end_time),
+            route: this.route_id,
+            isLegEnd: this.to.isTransfer
+        }
     }
     toString(){
         let transferType = (this.to.isTransfer) ? `Exit bus at ${this.to.name}`: ``
@@ -184,12 +184,11 @@ class OutboundConnection extends Edge{
         return 0
     }
     actions(){
-        let action = [{
+        return {
             type:'board',
             route: this.route_id,
-            stop: {stop_id: this.to.stop_id, name: this.to.name}
-        }]
-        return action
+            from: {stop_id: this.from.stop_id, name: this.from.name, latlon:this.from.latlon}
+        }
     }
     toString(){
         return `Board the number ${this.route_id} bus`
@@ -211,16 +210,15 @@ class WalkingPath extends Edge{
         return this.time
     }
     actions(){
-        let action = [{
+        return {
             type:'walk',
-            from: {stop_id: this.from.stop_id, name: this.from.name},
-            to: {stop_id: this.to.stop_id, name: this.to.name},
+            from: {stop_id: this.from.stop_id, name: this.from.name, latlon:this.from.latlon},
+            to: {stop_id: this.to.stop_id, name: this.to.name, latlon:this.to.latlon},
             distance: this.distance
-        }]
-        return action
+        }
     }
     toString(){
-        return `Walk to stop ${this.to.stop_id} ${this.to.name}`
+        return `Walk from stop  ${this.from.stop_id} ${this.from.name} to stop ${this.to.stop_id} ${this.to.name}`
     }
 }
 

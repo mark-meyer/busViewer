@@ -1,4 +1,5 @@
 module.exports = {
-    MAX_WALKING: .5,
-    WALKING_SPEED: 30 * 60
+    MAX_WALKING: .25,
+    WALKING_SPEED: 40 * 60, // seconds/mile
+    TRANSFER_COST: 300
 }

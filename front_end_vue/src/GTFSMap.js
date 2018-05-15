@@ -12,6 +12,75 @@ function setMap(map) {
     MAP = map
 }
 
+class Directions{
+    constructor(data) {
+        this.type = "directions"
+        this.data = data
+        this.stops = []
+        data.forEach((inst, i) => {       
+            let s = new Stop({
+                stop_id:inst.from.stop_id,
+                stop_lat:inst.from.latlon[1],
+                stop_lon:inst.from.latlon[0],
+            }, () => console.log("clicked"))
+            s.marker.setIcon({
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: i ? 6 : 8,
+                strokeColor: '#2222ff',
+                strokeWeight: 2,
+                fillColor:i == 0 ? "#eeee22" : (inst.type == 'walk' ? "#2222ff": "#22dd22"),
+                fillOpacity: 1
+                }
+            )
+            s.activate()
+            this.stops.push(s)
+            if(inst.stops) {
+                inst.stops.forEach((stop, i) => {
+                    let s = new Stop({
+                        stop_id:stop.to.stop_id,
+                        stop_lat:stop.to.latlon[1],
+                        stop_lon:stop.to.latlon[0],
+                    }, () => console.log("clicked"))
+                    s.marker.setIcon({
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale:  stop.isLegEnd ? 6 : 4,
+                        strokeColor: stop.isLegEnd ? '#aa2222' : '#44aa33',
+                        strokeWeight: 2,
+                        fillColor:stop.isLegEnd ? "#dd2222": "#fff",
+                        fillOpacity: 1
+                        }
+                    )
+                    s.activate()
+                    this.stops.push(s)                 
+                })
+            }
+            // if route ends with walking add destingation
+            if (i === data.length -1 && inst.type === 'walk'){
+                let s = new Stop({
+                    stop_id:inst.to.stop_id,
+                    stop_lat:inst.to.latlon[1],
+                    stop_lon:inst.to.latlon[0],
+                }, () => console.log("clicked"))
+                s.marker.setIcon({
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    strokeColor: '#dd2222',
+                    strokeWeight: 2,
+                    fillColor: "#dd2222",
+                    fillOpacity: 1
+                    }
+                )
+                s.activate()
+                this.stops.push(s)
+            }
+
+        })
+    }
+    deactivate(){
+        this.stops.forEach(stop => stop.deactivate())
+    }
+}
+
 class Route {
     constructor(data) {
         this.type = "route"
@@ -56,15 +125,15 @@ class Route {
     }
 }
 class Stop{
-    constructor(data, click) {
+    constructor(data, click, marker) {
         this.type           = "stop"
-        this.id         = data.stop_id
+        this.id             = data.stop_id
         this.coordinates    = {lat: +data.stop_lat, lng: +data.stop_lon}
         this.name           = data.stop_name
         this.url            = data.stop_url
         this.departure_time = data.departure_time
  
-        this.marker         = new google.maps.Marker({
+        this.marker         = marker || new google.maps.Marker({
             position: this.coordinates,
             map: MAP,
             icon: {
@@ -203,4 +272,4 @@ class Bus{
         clearInterval(this.chaseInterval)
     } 
 }
-export {Route, Stop, Bus, setMap}
+export {Directions, Route, Stop, Bus, setMap}

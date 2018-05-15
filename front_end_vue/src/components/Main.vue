@@ -6,7 +6,8 @@
         </div>
        
         <div id="root">
-           <infopanel></infopanel>        
+           <router-view />
+          <!-- <infopanel></infopanel>  -->
             <div id="holder">
                 <div ref="mainMap" id="mainMap"></div>
             </div>

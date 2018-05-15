@@ -2,6 +2,8 @@ const jheap = require('jheap')
 
 module.exports =  djkstra
 
+const {MAX_WALKING, WALKING_SPEED, TRANSFER_COST} = require('./graph_config')
+
 /********************************************************
  * Helper functions to go from seconds to  formatted time 
  */ 
@@ -19,7 +21,7 @@ function seconds_to_time(s){
 
 /************************************************************/
 
-function djkstra(source, graph) {
+function djkstra(source, graph, time) {
     /* To avoid mutating the original graph all data like
        costs and times is stored in node_info which is keyed to stop_id.
        The values from this will be added to the heap
@@ -37,8 +39,8 @@ function djkstra(source, graph) {
     const parents = {}
 
     const dt = new Date();
-    let route_time = dt.getSeconds() + (60 * dt.getMinutes()) + (60 * 60 * dt.getHours());
-    route_time = time_to_seconds('6:10:00')
+    route_time = parseInt(time) || dt.getSeconds() + (60 * dt.getMinutes()) + (60 * 60 * dt.getHours());
+    //route_time = time_to_seconds('6:10:00')
 
     const source_stop = graph.getStation(source)
     /*  d_score is the accumulated time on the path it's what we are trying to minimize by definition the source has 0 d_score*/
@@ -61,8 +63,10 @@ function djkstra(source, graph) {
 
         current.getBestEdgesForRoute(current.route, current_info.route_time)
         .forEach(edge => {
-            if (edge.isWalking && lastEdgeWalking ) return
-            lastEdgeWalking = edge.isWalking
+            let penalty = 0
+            //if ( parents[current.id] && parents[current.id].edge.isWalking  && edge.isWalking) penalty += 1000
+            //if (edge.isWalking && lastEdgeWalking ) return
+            //lastEdgeWalking = edge.isWalking
             const connecting_stop = edge.to
             if(visited.has(connecting_stop)) return
 
@@ -71,13 +75,19 @@ function djkstra(source, graph) {
 
             const current_dscore = current_info.d_score
             const connecting_dscore =  connecting_info.d_score
-            let penalty = current.isTransfer ? 300 : 0
-            penalty += edge.isWalking ? 300 : 0
-            if (connecting_dscore > current_dscore + time_diff + penalty ){
+            if (edge.isWalking){
+                penalty += edge.time 
+            } else if (edge.isStationConnection) {
+                penalty += TRANSFER_COST
+            }
+            
+            if (connecting_info.d_score > current_dscore + time_diff + penalty ){
                 connecting_info.d_score = current_dscore + time_diff + penalty
+                
                 /*  Set the route_time for this node. This will let us only look for departures after this time when it's
-                    this node's turn to be processed */
-                connecting_info.route_time = current_info.route_time + time_diff
+                    this node's turn to be processed. Walking routes don't have start and end times, so for them, we just add
+                    the its walking time to the current time.*/
+                connecting_info.route_time = edge.end_time ? edge.end_time : current_info.route_time + time_diff
 
                 if (parents[current.id] && parents[current.id].isTransfer ){
                     // set the proper time if the current route just exiteds a station on outoging station edge
@@ -100,6 +110,8 @@ function djkstra(source, graph) {
             }
         })
         heap.heapify()
+
     }
     return parents
 }
+   

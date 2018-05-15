@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {Route, Stop, Bus} from '../GTFSMap.js'
+import {Route, Stop, Bus, Directions} from '../GTFSMap.js'
 Vue.use(Vuex)
 
 import axios from 'axios'
@@ -11,11 +11,21 @@ export default new Vuex.Store({
         routes: [],
         selected: undefined,
         currentRoute: undefined,
-        tripStop: undefined
+        tripStop: undefined,
+        directions:undefined,
+        time: 22200,
     },
     mutations: {
+        setDirections(state, dir){
+            if (state.directions) state.directions.deactivate()
+            state.directions = dir
+            console.log("directions", dir)
+        },
         setRoutes(state, routes){
             state.routes = routes
+        },
+        setTime(state, time){
+            state.time = time
         },
         selectRoute(state, route){
             if(state.currentRoute) state.currentRoute.deactivate()
@@ -29,6 +39,9 @@ export default new Vuex.Store({
             if(state.selected) state.selected.deselect()
             obj.select()
             state.selected = obj
+        },
+        deselectAll(state){
+            if(state.currentRoute) state.currentRoute.deactivate()
         },
         unsetSelected(state){
             if(state.tripStop) state.tripStop.deselect()
@@ -54,6 +67,27 @@ export default new Vuex.Store({
         }
     },
     actions: {
+        unselect({commit, state}){
+            return commit('deselectAll')
+        },
+        getDirectionsWithTime({commit, state, dispatch}, data){
+            commit('setTime', data.time)
+            clearTimeout(this.debounce)
+            this.debounce = setTimeout(function() {
+                 if (data.to && data.from){
+                    dispatch('getDirections', {from: data.from, to: data.to}) 
+                 }
+            }.bind(this), 200)
+            
+
+        },
+        getDirections({commit, state, dispatch}, endPoints){
+            return axios.get(`${apiBaseUrl}directions/${endPoints.to}/${endPoints.from}/${state.time}`)
+            .then(res => {
+                let d = new Directions(res.data)
+                commit('setDirections', d)
+            })
+        },
         getRoutes( {commit, state} ){
             return axios.get(`${apiBaseUrl}routes`)
             .then(routeData => {
@@ -108,7 +142,5 @@ export default new Vuex.Store({
                 })  
             }
         }
-        
-
     }
 })

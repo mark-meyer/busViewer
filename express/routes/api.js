@@ -16,16 +16,32 @@ router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-router.get('/shortest_path/:from_stop/:to_stop', function (req, res, next){
+router.get('/directions/:from_stop/:to_stop/:time', function (req, res, next){
     let from = req.params.from_stop
     let to = req.params.to_stop
-    let parents = shortestPath(from, graph)
+    let time = req.params.time // sceconds
+    let parents = shortestPath(from, graph, time)
     let p = parents[to]
     let directions = [] 
+    let text = []
+    let current_leg = undefined
     while(p){
-        directions = p.edge.actions().concat(directions)
+        text.unshift(p.edge.toString())
+        direction = p.edge.actions()
+        if(direction.isLegEnd ) {
+            current_leg = {type:"board", stops: [direction]}
+            directions.unshift(current_leg)
+        } else if (current_leg){
+            if (direction.type == 'board') {
+                current_leg.route = direction.route
+                current_leg.from = direction.from
+                current_leg = undefined
+            } else current_leg.stops.unshift(direction)
+        } else directions.unshift(direction)
+        
         p = parents[p.parent.id]
     } 
+    console.log(text.join('\n'))
     res.json(directions)
 })
 
