@@ -74,7 +74,7 @@ class Trips extends GTFS_File{
         // parsed data is indexed by route_id
         // with arrays of trips & shapes ids
 
-        this.data_by_route  = data.reduce((a, c) => {
+        this.data_by_route = data.reduce((a, c) => {
             if (a[c.route_id]){
                 a[c.route_id].trips.push(c.trip_id)
                 a[c.route_id].shapes.add(c.shape_id)
@@ -84,7 +84,7 @@ class Trips extends GTFS_File{
             }
             return a
         }, {})
-        Object.values(this.data_by_route).map(v => v.shapes = [...v.shapes]) // convert set back to array
+        Object.values(this.data_by_route).forEach(v => v.shapes = [...v.shapes]) // convert set back to array
     }
 }
 

@@ -82,7 +82,7 @@ export default new Vuex.Store({
 
         },
         getDirections({commit, state, dispatch}, endPoints){
-            return axios.get(`${apiBaseUrl}directions/${endPoints.to}/${endPoints.from}/${state.time}`)
+            return axios.get(`${apiBaseUrl}directions/${endPoints.from}/${endPoints.to}/${state.time}`)
             .then(res => {
                 let d = new Directions(res.data)
                 commit('setDirections', d)

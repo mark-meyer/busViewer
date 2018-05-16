@@ -153,7 +153,9 @@ class Edge{
     }
     costFromTime(t) {
         /* this ensures that costs are relative to current time on graph */
-        return this.end_time - this.start_time
+        //return this.end_time - this.start_time // <-- this doesn't work because it doesn't take waiting time into account
+        return this.end_time - t
+        
     }
     actions(){
         return {

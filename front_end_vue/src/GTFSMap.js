@@ -18,11 +18,7 @@ class Directions{
         this.data = data
         this.stops = []
         data.forEach((inst, i) => {       
-            let s = new Stop({
-                stop_id:inst.from.stop_id,
-                stop_lat:inst.from.latlon[1],
-                stop_lon:inst.from.latlon[0],
-            }, () => console.log("clicked"))
+            let s = this.makeStop(inst.from)      
             s.marker.setIcon({
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: i ? 6 : 8,
@@ -36,11 +32,7 @@ class Directions{
             this.stops.push(s)
             if(inst.stops) {
                 inst.stops.forEach((stop, i) => {
-                    let s = new Stop({
-                        stop_id:stop.to.stop_id,
-                        stop_lat:stop.to.latlon[1],
-                        stop_lon:stop.to.latlon[0],
-                    }, () => console.log("clicked"))
+                    let s = this.makeStop(stop.to)
                     s.marker.setIcon({
                         path: google.maps.SymbolPath.CIRCLE,
                         scale:  stop.isLegEnd ? 6 : 4,
@@ -56,11 +48,7 @@ class Directions{
             }
             // if route ends with walking add destingation
             if (i === data.length -1 && inst.type === 'walk'){
-                let s = new Stop({
-                    stop_id:inst.to.stop_id,
-                    stop_lat:inst.to.latlon[1],
-                    stop_lon:inst.to.latlon[0],
-                }, () => console.log("clicked"))
+                let s = this.makeStop(inst.to)
                 s.marker.setIcon({
                     path: google.maps.SymbolPath.CIRCLE,
                     scale: 8,
@@ -76,6 +64,14 @@ class Directions{
 
         })
     }
+    makeStop(stop){
+        return new Stop({
+            stop_id:stop.stop_id,
+            stop_lat:stop.latlon[1],
+            stop_lon:stop.latlon[0],
+            }, () => console.log("clicked")
+        )
+    }
     deactivate(){
         this.stops.forEach(stop => stop.deactivate())
     }
@@ -87,6 +83,7 @@ class Route {
         this.id        = data.route_id,
         this.name      = data.route_long_name,
         this.color     = "#" + data.route_color,
+        this.shapes    = data.shapes 
         this.polylines = data.shapes.map(path => 
             new google.maps.Polyline({ 
                 map: MAP,
