@@ -37,6 +37,13 @@ class Directions{
             if(inst.stops) {
                 let route = store.state.routes[inst.route]
                 
+                let t_id = inst.stops[0].trip_id
+                inst.stops.forEach(stop => {
+                    if (stop.trip_id != t_id) {
+                        t_id = stop.trip_id
+                    }
+                })
+
                 let trip_id = inst.stops[0].trip_id
                 let s1 = {lat: parseFloat(inst.stops[0].from.latlon[1]),lng: parseFloat( inst.stops[0].from.latlon[0])}
                 let s2 = {lat: parseFloat(inst.stops[inst.stops.length -1].to.latlon[1]), lng: parseFloat(inst.stops[inst.stops.length -1].to.latlon[0])}

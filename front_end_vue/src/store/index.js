@@ -19,7 +19,10 @@ export default new Vuex.Store({
         setDirections(state, dir){
             if (state.directions) state.directions.deactivate()
             state.directions = dir
-            console.log("directions", dir)
+        },
+        unsetDirections(state){
+            if (state.directions) state.directions.deactivate()
+            state.directions = undefined
         },
         setRoutes(state, routes){
             state.routes = routes
@@ -78,12 +81,15 @@ export default new Vuex.Store({
                     dispatch('getDirections', {from: data.from, to: data.to}) 
                  }
             }.bind(this), 200)
-            
-
         },
         getDirections({commit, state, dispatch}, endPoints){
             return axios.get(`${apiBaseUrl}directions/${endPoints.from}/${endPoints.to}/${state.time}`)
             .then(res => {
+                if (res.data.error) {
+                    commit('unsetDirections')
+                    throw(new Error(res.data.error))
+                    return
+                }
                 let d = new Directions(res.data)
                 commit('setDirections', d)
             })

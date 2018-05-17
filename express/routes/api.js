@@ -6,10 +6,10 @@ var busXML = require('../lib/xmlBusData.js')
 const raw_directory = (__dirname + '/../gtfs/')
 var Transit_Graph = require('../lib/transit_graph.js')
 const shortestPath = require('../lib/shortest_path.js')
+
 let graph
 Transit_Graph.initializeFromGTFS(raw_directory)
 .then(g => graph = g)
-//console.log("graph", graph)
 
 /* GET api listing. */
 router.get('/', function(req, res, next) {
@@ -19,6 +19,14 @@ router.get('/', function(req, res, next) {
 router.get('/directions/:from_stop/:to_stop/:time', function (req, res, next){
     let from = req.params.from_stop
     let to = req.params.to_stop
+    if (!gtfs.stops[from]) {
+        res.json({error: `Unrecognized Stop: ${from}`})
+        return
+    }
+    if (!gtfs.stops[to]) {
+        res.json({error: `Unrecognized Stop: ${to}`})
+        return
+    }
     let time = req.params.time // sceconds
     let parents = shortestPath(from, graph, time)
     let p = parents[to]

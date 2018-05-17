@@ -32,9 +32,9 @@ class Graph{
         this.all_nodes = [...n] 
         return [...n]
     }
-    addTripBetweenStations(from, next, trip, depart_time, arrival_time){
+    addTripBetweenStations(from, next, trip, depart_time, arrival_time, service_id){
         let route_id = trip.route_id      
-        let next_bypass = from.addOutgoing(next, depart_time, arrival_time, trip)
+        let next_bypass = from.addOutgoing(next, depart_time, arrival_time, trip, service_id)
         return next_bypass
     }
     findNearestStops([lon, lat]) {
@@ -66,7 +66,7 @@ class Node{
         this.route = route
         this.latlon = latlon
     }
-    addOutgoing(next, depart_time, arrival_time, trip){
+    addOutgoing(next, depart_time, arrival_time, trip, service_id){
         let route_id = trip.route_id
         /*  In this model edges departing Nodes are really edge pairs:
               1: from outgoing node into transfer station
@@ -79,8 +79,8 @@ class Node{
         let edge_pair = {
             start_time: depart_time,
             edges:[
-                    new Edge(next, this, depart_time, arrival_time, route_id, trip),
-                    new Edge(next_bypass, this, depart_time, arrival_time, route_id, trip) 
+                    new Edge(next, this, depart_time, arrival_time, route_id, trip, service_id),
+                    new Edge(next_bypass, this, depart_time, arrival_time, route_id, trip, service_id) 
                   ]
             };
         (this.outgoing[route_id] || (this.outgoing[route_id] = [])).push(edge_pair)
@@ -89,7 +89,9 @@ class Node{
     getBestEdgesForRoute(route, time){
         // This returns the next edge pair after the given time for a particular route
         if (!this.outgoing[route]) return []
-        return b_search(this.outgoing[route], time).edges
+        // Currently only looking at weekday trips. #TODO add ability to choose day on fron end
+        let today_edges = this.outgoing[route].filter(obj => obj.edges[0].service_id == 1)
+        return b_search(today_edges, time).edges
     }
     sortOutgoing(){
         Object.values(this.outgoing).forEach(item => 
@@ -144,7 +146,7 @@ class Transfer extends Node{
 
 class Edge{
     /* Edges connect outgoing Nodes either to other Nodes or to transfer stations */
-    constructor(to, from, start_time, end_time, route, trip){
+    constructor(to, from, start_time, end_time, route, trip, service_id){
         this.to = to // this should be a node
         this.from = from
         this.start_time = start_time
@@ -152,6 +154,7 @@ class Edge{
         this.route_id = route
         this.trip = trip
         this.isStationConnection = false
+        this.service_id = service_id
     }
     costFromTime(t, w) {
         /* this ensures that costs are relative to current time on graph */
@@ -272,7 +275,8 @@ function initializeFromGTFS(raw_directory){
             }
     
             let next_station = graph.getStation(record.stop_id)   
-            let next = graph.addTripBetweenStations(fromStop.stop, next_station, tripsToRoute[record.trip_id], fromStop.departs, seconds )
+            let service_id = parseInt(tripsToRoute[record.trip_id].service_id, 10)
+            let next = graph.addTripBetweenStations(fromStop.stop, next_station, tripsToRoute[record.trip_id], fromStop.departs, seconds, service_id )
             prevStopOnTrip[record.trip_id] = {stop: next, departs:seconds}      
         })
         graph.allNodes().forEach(node => node.sortOutgoing())

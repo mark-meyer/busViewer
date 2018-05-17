@@ -5,18 +5,22 @@
             Navigate
             </h3>
             <div id="time">
-                <input v-model="time" type="range" min="1" max="86340" class="slider" id="time">{{seconds_to_time}}
-                
+                <input v-model="time" type="range" min="1" max="86340" class="slider" id="time">{{seconds_to_time}}          
             </div>
 
-
-            <input  v-model="from" type="text" placeholder="From">
+            <input v-model="from" type="text" placeholder="From">
             <input v-model="to" type="text" placeholder="to"> <button @click="loadDirections()"> Navigate </button>  
             <div id = "directions" v-if="directions" >
                 <ul>
                     <component :is="d.type" v-for="(d, index) in directions.data" v-bind:key="index" :data="d"></component>
-
                 </ul>
+            </div>
+            <div id = "error" v-if="error" >
+                <span class='icon'>!</span>
+                <b id="error_title"> Error: </b>
+                <div id="error_message">
+                    {{error.message}}
+                </div>
             </div>
             
         </div>
@@ -35,7 +39,7 @@ export default {
         return {
             from: undefined,
             to: undefined,
-            debounce: undefined
+            error: undefined,
         }
     },
     components: {
@@ -45,8 +49,10 @@ export default {
         exit: Exit
     },
     methods: {
-        loadDirections(){          
+        loadDirections(){
+            this.error = undefined          
             this.$store.dispatch('getDirections', {from: this.from, to: this.to})
+            .catch(err => this.error = err)
         }
 
      },
@@ -108,5 +114,30 @@ export default {
     #time input{
         margin-right: .25em;
     }
-    
+    #error {
+        margin-top: 2em;
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        padding: 1em 0;
+
+    }
+    .icon{
+        border-radius: 50%;
+        color: #fff;
+        background-color: #e85959;
+        width: 1.75em;
+        height: 1.75em;
+        display: inline-block;
+        text-align: center;
+        margin-right:.5em;
+        font-size: 1em;
+        font-weight: bold;
+    }
+    #name {
+        font-size: .85em;
+    }
+    #error_message {
+        margin-top: 0px;
+        margin-left: 2.5em;
+    }
 </style>
