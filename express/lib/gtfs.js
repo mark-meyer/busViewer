@@ -74,17 +74,21 @@ class Trips extends GTFS_File{
         // parsed data is indexed by route_id
         // with arrays of trips & shapes ids
 
-        this.data_by_route = data.reduce((a, c) => {
+        this.data_by_route  = data.reduce((a, c) => {
             if (a[c.route_id]){
-                a[c.route_id].trips.push(c.trip_id)
+                a[c.route_id].trips[c.trip_id] = {shape_id: c.shape_id}
                 a[c.route_id].shapes.add(c.shape_id)
                 
             } else {
-                a[c.route_id] = {'trips':[c.trip_id], shapes:new Set([c.shape_id])}
+                a[c.route_id] = {'trips':{
+                                    [c.trip_id]: {shape_id: c.shape_id}
+                                },
+                                'shapes': new Set([c.shape_id])
+                                }
             }
             return a
         }, {})
-        Object.values(this.data_by_route).forEach(v => v.shapes = [...v.shapes]) // convert set back to array
+        Object.values(this.data_by_route).map(v => v.shapes = [...v.shapes]) // convert set back to array
     }
 }
 
@@ -178,7 +182,10 @@ class GTFS {
     shapeFromRoute(routeID){
         // A single Route can have more than one shape associated with it
         let trip = this.trips.data_by_route[routeID]
-        return trip.shapes.map(id => this.shapes[id])
+        return trip.shapes.reduce((a,shape_id) => {
+            a[shape_id] = this.shapes[shape_id]
+            return a
+        }, {})
     }
     routeWithShape(routeID) {
         let trip = this.trips.data_by_route[routeID]
@@ -188,7 +195,15 @@ class GTFS {
         return route
     }
     allRoutes(){
-        return Object.keys(this.routes.data).map(route => ({...this.routes[route], shapes: this.shapeFromRoute(route) }))
+
+        return Object.keys(this.routes.data).map(route => {
+            let trip = this.trips.data_by_route[route]
+            let shapes = trip.shapes.reduce((a,shape_id) => {
+                a[shape_id] = this.shapes[shape_id]
+                return a
+            }, {})
+            return {...this.routes[route], shapes: shapes, trips: trip.trips }
+        })
     }
     allStopsOnRoute(routeID){
         // get trip IDs associate with route:
@@ -196,7 +211,7 @@ class GTFS {
         // ps. gtfs is annoying
         let trips = this.trips.data_by_route[routeID].trips
         let stopIDs = this.stop_times.data
-                      .filter(item => trips.includes(item.trip_id))
+                      .filter(item => trips[item.trip_id])
                       .reduce((acc, item) => {
                     
                         if (!acc[item.stop_id]) {

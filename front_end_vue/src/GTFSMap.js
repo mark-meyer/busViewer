@@ -17,6 +17,8 @@ class Directions{
         this.type = "directions"
         this.data = data
         this.stops = []
+        this.polylines = []
+        
         data.forEach((inst, i) => {       
             let s = this.makeStop(inst.from)      
             s.marker.setIcon({
@@ -30,22 +32,44 @@ class Directions{
             )
             s.activate()
             this.stops.push(s)
+            
+            
             if(inst.stops) {
+                let route = store.state.routes[inst.route]
+                
+                let trip_id = inst.stops[0].trip_id
+                let s1 = {lat: parseFloat(inst.stops[0].from.latlon[1]),lng: parseFloat( inst.stops[0].from.latlon[0])}
+                let s2 = {lat: parseFloat(inst.stops[inst.stops.length -1].to.latlon[1]), lng: parseFloat(inst.stops[inst.stops.length -1].to.latlon[0])}
+
+                let segment = route.pathBewteenStops(s1 ,s2, trip_id)
+                
+                this.polylines.push(new google.maps.Polyline({ 
+                    map: MAP,
+                    path: segment,
+                    geodesic: true,
+                    strokeColor: route.color,
+                    strokeOpacity: 0.8,
+                    strokeWeight: 6
+                }))
+
+                
                 inst.stops.forEach((stop, i) => {
                     let s = this.makeStop(stop.to)
                     s.marker.setIcon({
                         path: google.maps.SymbolPath.CIRCLE,
-                        scale:  stop.isLegEnd ? 6 : 4,
-                        strokeColor: stop.isLegEnd ? '#aa2222' : '#44aa33',
+                        scale:  stop.isLegEnd ? 6 : 2,
+                        strokeColor: stop.isLegEnd ? '#aa2222' : '#dddddd',
                         strokeWeight: 2,
                         fillColor:stop.isLegEnd ? "#dd2222": "#fff",
-                        fillOpacity: 1
+                        fillOpacity: .5
                         }
                     )
                     s.activate()
                     this.stops.push(s)                 
                 })
+                
             }
+            
             // if route ends with walking add destingation
             if (i === data.length -1 && inst.type === 'walk'){
                 let s = this.makeStop(inst.to)
@@ -74,6 +98,7 @@ class Directions{
     }
     deactivate(){
         this.stops.forEach(stop => stop.deactivate())
+        this.polylines.forEach(line => line.setMap(null))
     }
 }
 
@@ -82,9 +107,10 @@ class Route {
         this.type = "route"
         this.id        = data.route_id,
         this.name      = data.route_long_name,
-        this.color     = "#" + data.route_color,
+        this.color     = "#" + data.route_color
         this.shapes    = data.shapes 
-        this.polylines = data.shapes.map(path => 
+        this.trips     = data.trips
+        this.polylines = Object.values(data.shapes).map(path => 
             new google.maps.Polyline({ 
                 map: MAP,
                 path: path,
@@ -119,6 +145,44 @@ class Route {
     stop(id){
         if (!this.stops) return
         return this.stops.find(stop => stop.id == id)
+    }
+    pathBewteenStops(stop1, stop2, trip_id){
+        /* Given two points and a trip_id, this will find the path for the trip_id and extract a segment that begins and ends
+           at stops stop1 and stop2 */
+        const shape = this.shapes[trip_id]
+        const square = (a) => a * a
+        const distanceSquared = (a, b) => square(a.lat - b.lat) + square(a.lng - b.lng) 
+
+        /* Find the closest point on a line segment defined by s1 & s2 to point p  and its distance*/
+        const distToSegmentSquared = (p, s1, s2) => {
+
+            const l2norm = distanceSquared(s1, s2)
+            // should probably check for zero since we divide by l2norm
+           // if (l2norm === 0) return distanceSquared(p, s1);
+            let t = ((p.lat - s1.lat) * (s2.lat - s1.lat) + (p.lng - s1.lng) * (s2.lng - s1.lng)) / l2norm;
+            t = Math.max(0, Math.min(1, t));
+            let test_p = {lat: s1.lat + t * (s2.lat - s1.lat), lng: s1.lng + t * (s2.lng - s1.lng)}
+            return {dist: Math.sqrt(distanceSquared(p, test_p)), p:test_p}
+        }
+
+        /* look at every segment in the path and find the one closest to stop1 and stop 2 */
+        let shape_id = this.trips[trip_id].shape_id
+        let points = this.shapes[shape_id]
+        
+        let closest = [{dist: 100000}, {dist: 100000}] 
+        for (let i = 1; i < points.length; i++){
+            let d1 = distToSegmentSquared(stop1, points[i-1], points[i])
+            let d2 = distToSegmentSquared(stop2, points[i-1], points[i])
+            d1.index= i
+            d2.index = i 
+            if (d1.dist < closest[0].dist) closest[0] = d1
+            if (d2.dist < closest[1].dist) closest[1] = d2
+        }
+        let start = closest[0]
+        let end = closest[1]
+        if(start.index > end.index) [start, end] = [end, start]
+        let segment = points.slice(start.index, end.index)
+        return [start.p, ...segment, end.p]
     }
 }
 class Stop{

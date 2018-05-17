@@ -35,6 +35,7 @@ router.get('/directions/:from_stop/:to_stop/:time', function (req, res, next){
             if (direction.type == 'board') {
                 current_leg.route = direction.route
                 current_leg.from = direction.from
+                current_leg.trip_id = direction.trip_id
                 current_leg = undefined
             } else current_leg.stops.unshift(direction)
         } else directions.unshift(direction)

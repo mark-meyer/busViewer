@@ -59,13 +59,13 @@ function djkstra(source, graph, time) {
         visited.add(current)
         /* Look at each outgoing connection and get the next upcomings route to that connection
            Set the d_score of the connecting stop it it hasn't already been visited */
-        //let lastEdgeWalking = false
+        let lastEdgeWalking = false
 
         current.getBestEdgesForRoute(current.route, current_info.route_time)
         .forEach(edge => {
             let penalty = 0
-            //if ( parents[current.id] && parents[current.id].edge.isWalking  && edge.isWalking) penalty += 1000
-            //if (edge.isWalking && lastEdgeWalking ) return
+            if ( parents[current.id] && parents[current.id].edge.isWalking  && edge.isWalking) penalty += 1000
+           // if (edge.isWalking && lastEdgeWalking ) return
             //lastEdgeWalking = edge.isWalking
             const connecting_stop = edge.to
             if(visited.has(connecting_stop)) return

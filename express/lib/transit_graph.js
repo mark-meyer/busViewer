@@ -130,9 +130,11 @@ class Transfer extends Node{
         /* Transfer stations only have one edge per route, from the station to the outbound node 
            Just return all outgoing edges
         */
-        return Object.values(this.outgoing)
+        return Object.values(this.outgoing).sort((a,b) => a.distance - b.distance)
     }
-    sortOutgoing(){}
+    sortOutgoing(){
+       
+    }
 
     addWalkingPathTo(station, distance) {
         let edge = new WalkingPath(station, this, distance)
@@ -151,10 +153,10 @@ class Edge{
         this.trip = trip
         this.isStationConnection = false
     }
-    costFromTime(t) {
+    costFromTime(t, w) {
         /* this ensures that costs are relative to current time on graph */
         //return this.end_time - this.start_time // <-- this doesn't work because it doesn't take waiting time into account
-        return this.end_time - t
+        return  this.end_time - t
         
     }
     actions(){
@@ -165,7 +167,8 @@ class Edge{
             to: {stop_id: this.to.stop_id, name: this.to.name, latlon:this.to.latlon},
             arrives: seconds_to_time(this.end_time),
             route: this.route_id,
-            isLegEnd: this.to.isTransfer
+            isLegEnd: this.to.isTransfer,
+            trip_id: this.trip.trip_id
         }
     }
     toString(){
@@ -177,13 +180,19 @@ class Edge{
 class OutboundConnection extends Edge{
     /*  OutboundConnections connect Transfers to their outgoing Nodes. 
         They add no time to the cost of the trip */
-    constructor(to, from, route){
-        super(to,from, undefined, undefined, route, undefined)
+    constructor(to, from, route_id){
+        super(to,from, undefined, undefined, route_id, undefined)
         this.isStationConnection = true
     }
     costFromTime(t) {
-        /* Connections between transfer and outbound Node are free */
-        return 0
+        /* Connections between transfer and outbound Node factor in the cost of waiting
+           This looks ahead to the next possible trip for this route and determines the cost based
+           on the current time.  */
+        let next_edge = this.to.getBestEdgesForRoute(this.route_id, t)
+        let cost = 0
+        if (next_edge.length)
+            cost = next_edge[0].start_time - t
+        return cost
     }
     actions(){
         return {
